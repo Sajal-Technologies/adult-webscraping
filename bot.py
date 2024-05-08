@@ -652,7 +652,7 @@ class scrapping_bot():
         self.random_sleep(6,10)
         collection_name = (f'{self.brazzers.category}_videos' if not collection else f'brazzers_{collection}').replace('brazzers_brazzers','brazzers')
         video_detailes['collection_name'] = collection_name        
-        self.make_csv(collection_name,new=True) if collection else None
+        if collection:self.make_csv(collection_name,new=True) 
         csv_name = collection_name if collection else self.brazzers.website_name
 
         df_url = self.column_to_list(csv_name,'Url')
