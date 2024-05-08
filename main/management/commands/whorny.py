@@ -12,7 +12,7 @@ class Command(BaseCommand):
         for _ in range(1):
             try:
                 bot = scrapping_bot()
-                print('adultprime process starting')
+                print('whorny process starting')
                 if bot.whorny_login():
                     logggg = True
                     bot.download_whorny_videos()

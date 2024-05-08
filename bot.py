@@ -399,10 +399,10 @@ class scrapping_bot():
                 if os.path.isfile(path):
                     with open(path,'rb') as f:cookies = json.load(f)
                     for item in cookies: self.driver.add_cookie(item)
-                    self.random_sleep()                
+            self.driver.refresh()
+            self.random_sleep()                
         except : 
             SendAnEmail('The coockies could not be loaded')
-        self.driver.refresh()
 
     def get_cookies(self,website :str):
         path = os.path.join(self.cookies_path,f'{website}_cookietest.json')
@@ -692,7 +692,7 @@ class scrapping_bot():
         if 'brazzers_main' in Site_name: 
             sub_folder = Site_name
         elif Site_name:
-            sub_folder = collection_name.remove('brazzers_', '')
+            sub_folder = collection_name.replace('brazzers_', '')
         else: sub_folder = None
         csv_name = collection_name if Site_name else self.brazzers.website_name
         collection_path = self.create_or_check_path(self.brazzers_category_path, sub_folder_=sub_folder)
@@ -747,14 +747,14 @@ class scrapping_bot():
 
                 response = requests.get(video_url['post_url'])
                 with open(f'{collection_path}/{video_name}.jpg', 'wb') as f:f.write(response.content)
-                self.click_element('download btn', '//button[@class="sc-yox8zw-1 VZGJD sc-rco9ie-0 jnUyEX"]') 
-                self.click_element('download high_quality','//div[@class="sc-yox8zw-0 cQnfGv"]/ul/div/button[1]')
-                file_name = self.wait_for_file_download()
-                self.random_sleep(3,5)
-                name_of_file = os.path.join(self.download_path, f'{video_name}.mp4')
-                os.rename(os.path.join(self.download_path,file_name), name_of_file)
-                self.random_sleep(3,5)
-                self.copy_files_in_catagory_folder(name_of_file,collection_path)
+                # self.click_element('download btn', '//button[@class="sc-yox8zw-1 VZGJD sc-rco9ie-0 jnUyEX"]') 
+                # self.click_element('download high_quality','//div[@class="sc-yox8zw-0 cQnfGv"]/ul/div/button[1]')
+                # file_name = self.wait_for_file_download()
+                # self.random_sleep(3,5)
+                # name_of_file = os.path.join(self.download_path, f'{video_name}.mp4')
+                # os.rename(os.path.join(self.download_path,file_name), name_of_file)
+                # self.random_sleep(3,5)
+                # self.copy_files_in_catagory_folder(name_of_file,collection_path)
                 self.set_data_of_csv(csv_name,tmp,video_name=video_name)
             except Exception as e:
                 print('Error:', e)
@@ -1213,7 +1213,7 @@ class scrapping_bot():
             for vd_link in handjob_not_used_links:
                 self.driver.get(vd_link[0])
                 self.random_sleep(10,15)
-                self.driver.find_elements(By.XPATH,'//*[@class="download-full-movie"]/div/*')[-1].click()
+                self.driver.find_elements(By.XPATH,'//*[@class="download-full-movie"]/div/*')[-2].click()
                 self.random_sleep(3,5)
                 file_name = self.wait_for_file_download()
                 self.random_sleep(3,5)
@@ -1232,7 +1232,7 @@ class scrapping_bot():
     def handjob_get_video(self,url=None):
         videos_urls = []
         VideosNumberDone = 0
-        self.other_sites_of_handjob()
+        # self.other_sites_of_handjob()
         self.driver.page_source
         self.driver.get(f'https://handjob.tv/search/{self.handjob.category}/')
         df_url = self.column_to_list(self.handjob.website_name,'Url')
@@ -1271,7 +1271,8 @@ class scrapping_bot():
             
             video_title = video_title_ele.text
             
-            video_link = video_ele.get_attribute('src')
+            # video_link = video_ele.get_attribute('src')
+            video_link = self.driver.find_elements(By.XPATH,'//*[@class="download-full-movie"]/div/*')[-2].get_attribute('href')
             video_name = f"handjob_{self.handjob.category.replace('videos', '')}_{self.sanitize_title(video_title)}"
             
             VideoDdownloaded = False
@@ -1394,21 +1395,21 @@ class scrapping_bot():
             g_response = solver.solve_and_return_solution()
             
             if g_response == 0:
-                
                 print ("task finished of captcha solver with error "+solver.error_code)
                 return False
             print ("g-response: "+g_response)
+            self.driver.execute_script(f'document.getElementById("g-recaptcha-response").innerHTML = "{g_response}";')
             
-            captcha_text_area_id = 'g-recaptcha-response'
-            captcha_response = self.find_element('Captcha-text-area',captcha_text_area_id,By.ID,timeout=3)
-            if not captcha_response :
-                captcha_text_area_id = 'g-recaptcha-response-1'
-                captcha_response = self.find_element('captcha 2 text area',captcha_text_area_id,By.ID,timeout=3)
+            # captcha_text_area_id = 'g-recaptcha-response'
+            # captcha_response = self.find_element('Captcha-text-area',captcha_text_area_id,By.ID,timeout=3)
+            # if not captcha_response :
+            #     captcha_text_area_id = 'g-recaptcha-response-1'
+            #     captcha_response = self.find_element('captcha 2 text area',captcha_text_area_id,By.ID,timeout=3)
             
-            if not captcha_response : return False
-            self.driver.execute_script("arguments[0].style.display = 'block';", captcha_response)
-            captcha_response = self.driver.find_element(By.ID, captcha_text_area_id)
-            captcha_response.send_keys(g_response)
+            # if not captcha_response : return False
+            # self.driver.execute_script("arguments[0].style.display = 'block';", captcha_response)
+            # captcha_response = self.driver.find_element(By.ID, captcha_text_area_id)
+            # captcha_response.send_keys(g_response)
             
             if g_response : return True
             
@@ -1416,28 +1417,28 @@ class scrapping_bot():
 
     
     def naughty_ame_login(self):
-        self.click_element('Login','//a[text()="LOGIN"]')
-        self.random_sleep(10,15)
-        
+        # self.click_element('Login','//a[text()="LOGIN"]')
+        # self.random_sleep(10,15)
+        self.driver.get('https://members.naughtyamerica.com/postLogin')
+        self.load_cookies(self.naughty.website_name)
+        self.driver.refresh()
+        # self.random_sleep(10,15)
         if self.find_element('user btn','//*[@id="right-side-containter"]/div/div[2]/a/i') : 
             return True
-        # self.load_cookies(self.naughty.website_name)
-        # self.driver.get('https://members.naughtyamerica.com/postLogin')
-        self.click_element('Login','//a[text()="LOGIN"]')
         self.input_text(self.naughty.username,'Username','//*[@id="login-top"]/input[1]')
         self.input_text(self.naughty.password,'Password','//*[@id="login-top"]/input[2]')
-        if self.Sovle_captcha():
-            login_button = self.driver.find_element(By.ID, 'login')
-            login_button.click()
-            self.random_sleep(10,15)
-            self.driver.refresh()
-        
-        
-            if self.find_element('user btn','//*[@id="right-side-containter"]/div/div[2]/a/i'):
-                cookies = self.get_cookies(self.naughty.website_name)
-                member_cookies = [item for item in cookies if item.get("domain") == ".naughtyamerica.com"]
-                for item in member_cookies:self.driver.add_cookie(item)
-                return True
+        # self.click_element('Login','//a[text()="LOGIN"]')
+        self.Sovle_captcha()
+        self.click_element('Login','login', By.ID)
+        self.random_sleep(10,15)
+        self.driver.refresh()
+    
+    
+        if self.find_element('user btn','//*[@id="right-side-containter"]/div/div[2]/a/i'):
+            self.get_cookies(self.naughty.website_name)
+            # member_cookies = [item for item in cookies if item.get("domain") == ".naughtyamerica.com"]
+            # for item in member_cookies:self.driver.add_cookie(item)
+            return True
         
         return False
        
@@ -1445,34 +1446,21 @@ class scrapping_bot():
         self.driver.execute_script(f"window.open('{link}')")
         
     def get_naughty_video_links(self):
-        if not os.path.exists(os.path.join(os.getcwd(),'csv','naughty_america_videos_details.csv')) :
-            df = pd.DataFrame(columns= ["Likes","Disclike","Url","Category","video_download_url","Title","Discription","Release-Date","Poster-Image_uri","poster_download_uri","Video-name","Photo-name","Pornstarts","Username"])
-            df.to_csv(os.path.join(os.getcwd(),'csv','naughty_america_videos_details.csv'),index=False)
-        
-        df = pd.read_csv(os.path.join(os.getcwd(),'csv','naughty_america_videos_details.csv'))   
-        downloaded_vd_title = df['Title'].tolist()
+        downloaded_vd_url = self.column_to_list(self.brazzers.website_name,'Url')
         
         all_videos_link_li = []
         for _ in range(100):
                 
-            all_videos = self.driver.find_elements(By.XPATH, '//*[@id="sceneList"]//div[contains(@class, "scene-item") and contains(@class, "countable")]')
+            all_videos = self.driver.find_elements(By.XPATH, '//*[@style="cursor: pointer"]')
             for videos in all_videos:
+                url__ = videos.get_attribute('href')
                 
-                Video_a_tag = videos.find_elements(By.TAG_NAME,'a')
-                if not Video_a_tag : continue
-                
-                Video_a_tag = Video_a_tag[0]
-                vd_title=  Video_a_tag.get_attribute('title')
-                
-                if not vd_title in  downloaded_vd_title:
-                    url__ = Video_a_tag.get_attribute('href')
-                    if url__ :
-                        all_videos_link_li.append(url__)
-                        continue
-            
+                if url__ not in downloaded_vd_url:
+                    all_videos_link_li.append(url__)
         
-            if len(all_videos_link_li) >= self.naughty.numbers_of_download_videos :
-                return all_videos_link_li
+                if len(all_videos_link_li) >= self.naughty.numbers_of_download_videos :
+                    return all_videos_link_li
+
             
             if not self.click_element('View more','view-all-button',By.CLASS_NAME):
                 SendAnEmail('Could not find more videos into naughty america cetegories!',email=self.emailss)
@@ -1508,18 +1496,24 @@ class scrapping_bot():
         if not vd_title_ele : SendAnEmail('Could not find pornstars into naughty america!',email=self.emailss)
         else : data_dict['Title'] = vd_title_ele.text
         
-        data_dict['Title'] = ""
-        vd_title_ele = self.find_element('title','//p[@class="new-title"]')
-        if not vd_title_ele : SendAnEmail('Could not find pornstars into naughty america!',email=self.emailss)
-        else : data_dict['Title'] = vd_title_ele.text
+        post_url = self.find_element('img', "//*[@class='play_image darken-image']").get_attribute('src')
+        if post_url:
+            data_dict['post_url'] = post_url
+
         
         video_name = f"naughty_{self.naughty.category.replace('videos', '')}_{self.sanitize_title(data_dict['Title'])}"
         data_dict['Video-name'] = f'{video_name}.mp4'
         data_dict['Photo-name'] = f'{video_name}.jpg'
+
         v_url = f'http://208.122.217.49:8000{collection_path.replace(self.base_path,"")}/{video_name}.mp4'
         p_url = f'http://208.122.217.49:8000{collection_path.replace(self.base_path,"")}/{video_name}.jpg'
+
         data_dict['video_download_url'] = v_url
         data_dict['poster_download_uri'] = p_url
+
+        response = requests.get(post_url)
+        with open(os.path.join(collection_path, f'{video_name}.jpg'), 'wb') as f:f.write(response.content)
+
         
         data_dict['Release-Date'] = ""
         vd_Release_ele = self.find_element('Release date','//*[@id="more-info-container"]/div[1]/p[10]')
@@ -1530,35 +1524,33 @@ class scrapping_bot():
         data_dict['Discription'] = ""
         vd_Discription_ele = self.find_element('Discription','//*[@id="more-info-container"]/div[1]/p[6]')
         if not vd_Discription_ele : SendAnEmail('Could not find description into naughty america!',email=self.emailss)
-        else : data_dict['Discription'] = naughty_convert_relative_time(vd_Discription_ele.text)
+        else : data_dict['Discription'] = vd_Discription_ele.text
         
         self.set_data_of_csv(self.naughty.website_name,data_dict,video_name)
         
-        cur_url = self.driver.current_url
         self.click_element('4k download btn','//*[@id="download-options-menu"]/table/tbody/tr[3]/td[2]/a')
         self.Sovle_captcha()
         self.find_element('captcha form',"//form[contains(@action, 'captcha')]").submit()
+        self.click_element('download btn', '//*[@type="submit"]')
         
-        self.random_sleep(10,15,reson="for downloading naughty america videos")
-        while True :
-            new_video_download = [i for i in os.listdir('downloads')if i.endswith('.crdownload')]
-            if not new_video_download:
-                break    
+        # self.random_sleep(10,15,reson="for downloading naughty america videos")
+        self.wait_for_file_download(timeout=30)
         # self.click_element('download btn','//button[@type="submit" and @disabled="disabled" and contains(@class, "btn-download")]')
         return True
         
     def naughty_ame(self):
+
         try:
             download_com_videos = 0
             videos_cat_url = ''
             self.driver.get('https://members.naughtyamerica.com/')
-            if self.click_element('Enter naughty america','//*[@id="banner"]/div/div/div[2]/p[1]/a'):
-                self.random_sleep(10,15)
-            if self.find_element('Login','//a[text()="LOGIN"]'):
-                if not self.naughty_ame_login() : 
-                    SendAnEmail('Could not login into naughty america!',email=self.emailss)
-                    return
-            
+
+            # if self.click_element('Enter naughty america','//*[@id="banner"]/div/div/div[2]/p[1]/a'):
+            #     self.random_sleep(10,15)
+            # if self.find_element('Login',"login", By.ID):
+            if not self.naughty_ame_login() : 
+                SendAnEmail('Could not login into naughty america!',email=self.emailss)
+                return
             
             if not self.find_element('categories','//*[@id="header-tags"]'):
                 SendAnEmail('Could not find cetegories into naughty america!',email=self.emailss)
@@ -1584,15 +1576,80 @@ class scrapping_bot():
                 SendAnEmail('Could not find cetegories Entered and looking for, into naughty america!',email=self.emailss)
                 return
             
-            for _ in range(5):
-                all_videos_link_li = self.get_naughty_video_links()
-                for vd_link in all_videos_link_li:
-                    self.driver.get(vd_link)
-                    # if self.naughty_video_download(): download_com_videos+= 1
-                    download_com_videos+= 1
+            # for _ in range(5):
+            collection_name = self.naughty.category.lower()
+            all_videos_link_li = self.get_naughty_video_links()
+            for vd_link in all_videos_link_li:
+                self.driver.get(vd_link)
+                post_url = self.find_element('img', "//*[@class='play_image darken-image']").get_attribute('src')
+                tmp = {
+                    "Likes" : "",
+                    "Disclike" :"",
+                    "Url" : vd_link, 
+                    "Category" : collection_name,
+                    "video_download_url" : '',
+                    "Title" : '',
+                    "Discription" : "",
+                    "Release-Date" : "",
+                    "Poster-Image_uri" : post_url,
+                    "poster_download_uri" : '',
+                    "Video-name" : '',
+                    "Photo-name" : '',
+                    "Pornstarts" : '',
+                    "Username" : self.adultprime.website_name,
+                }
+                try:
+                    likes_count = self.find_element('Likes count','//span[@class="up-down-votes"]')
+                    if likes_count :
+                        like_dislike_count = str(likes_count.text).split("/")
+                        tmp['Likes'] = like_dislike_count[0].strip()
+                        tmp['Disclike'] = like_dislike_count[1].strip()
+
+                    script_content = self.driver.page_source
+                    Title =  re.search(r"title: '(.*?)'", script_content)
+                    if Title :
+                        tmp['Title'] = Title.group(1)
+
+                    Release = re.search(r"published_at: '(.*?)'", script_content)
+                    if Release :
+                        tmp['Release-Date'] = Release.group(1)
+
+                    Discription = self.find_element('Discription','//p[@class="update-info-line ap-limited-description-text regular hidden-xs"]')
+                    if Discription :
+                        tmp['Discription'] = Discription.text
                     
-                    if download_com_videos == self.naughty.numbers_of_download_videos:
-                        return True
+                    porn_starts = re.search(r"actors: '(.*?)'", script_content)
+                    if porn_starts:
+                        tmp['Pornstarts'] = porn_starts.group(1)
+
+                    video_name = f"adultprime_{collection_name.replace('_videos', '')}_{self.sanitize_title(tmp['Title'])}".replace('adultprime_adultprime','adultprime')
+                    tmp['Photo-name'] = f'{video_name}.jpg'
+                    tmp['Video-name'] = f'{video_name}.mp4'
+
+                    v_url = f'http://208.122.217.49:8000{collection_path.replace(self.base_path,"")}/{video_name}.mp4'.replace('\\', '/')
+                    p_url = f'http://208.122.217.49:8000{collection_path.replace(self.base_path,"")}/{video_name}.jpg'.replace('\\', '/')
+                    tmp['poster_download_uri'] = p_url  
+                    tmp['video_download_url'] = v_url
+
+                    response = requests.get(video_url['post_url'])
+                    with open(os.path.join(collection_path, f'{video_name}.jpg'), 'wb') as f:f.write(response.content)
+    
+                    local_filename =  os.path.join(collection_path, f'{video_name}.mp4')
+                    FullHD_link = self.driver.find_elements(By.XPATH, '//a[@class="stream-quality-selection download-link"]')
+                    if len(FullHD_link) > 2:
+                        decoded_url = FullHD_link[2].get_attribute('href')
+                        self.random_sleep(2,3)
+                        self.download_video_from_request(decoded_url, local_filename)
+                    else:continue
+
+                    self.set_data_of_csv(website_name,tmp,video_name)
+                except Exception as e:
+                    print('Error:', e)
+                # if self.naughty_video_download(): download_com_videos+= 1
+                download_com_videos+= 1
+                
+                if download_com_videos == self.naughty.numbers_of_download_videos:
+                    return True
             
         except Exception as e :
                 SendAnEmail('Could not complete the naughty america scrapping!'+f'\n{e}',email=self.emailss)
@@ -1967,7 +2024,7 @@ class scrapping_bot():
                                     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',                                'Accept-Encoding': 'gzip, deflate, br, zstd',                               
                                     'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
                                     }
-                                # self.download_video_from_request(url, os.path.join(collection_path, f'{video_name}.mp4'), headers)
+                                self.download_video_from_request(url, os.path.join(collection_path, f'{video_name}.mp4'), headers)
                                 self.set_data_of_csv(self.whorny.website_name,tmp,video_name)
                                 print(f'video download count: {videos_urls+1}')
                                 videos_urls+=1
