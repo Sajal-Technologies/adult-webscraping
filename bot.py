@@ -60,7 +60,7 @@ class scrapping_bot():
         self.handjob_category_path = self.create_or_check_path('handjob_category_videos')
 
         self.naughty = configuration.objects.get(website_name='naughtyamerica')
-        self.naughty_america_category_path = self.create_or_check_path('naughty_america')
+        self.naughty_america_category_path = self.create_or_check_path('naughty_america_videos')
 
         self.make_csv()
         self.delete_old_videos()
@@ -1419,6 +1419,7 @@ class scrapping_bot():
     def naughty_ame_login(self):
         # self.click_element('Login','//a[text()="LOGIN"]')
         # self.random_sleep(10,15)
+        self.get_driver()
         self.driver.get('https://members.naughtyamerica.com/postLogin')
         self.load_cookies(self.naughty.website_name)
         self.driver.refresh()
@@ -1446,8 +1447,7 @@ class scrapping_bot():
         self.driver.execute_script(f"window.open('{link}')")
         
     def get_naughty_video_links(self):
-        downloaded_vd_url = self.column_to_list(self.brazzers.website_name,'Url')
-        
+        downloaded_vd_url = self.column_to_list(self.naughty.website_name,'Url')
         all_videos_link_li = []
         for _ in range(100):
                 
@@ -1455,8 +1455,8 @@ class scrapping_bot():
             for videos in all_videos:
                 url__ = videos.get_attribute('href')
                 
-                if url__ not in downloaded_vd_url:
-                    all_videos_link_li.append(url__)
+                if url__ not in downloaded_vd_url:continue
+                all_videos_link_li.append(url__)
         
                 if len(all_videos_link_li) >= self.naughty.numbers_of_download_videos :
                     return all_videos_link_li
@@ -1471,9 +1471,7 @@ class scrapping_bot():
         
     def naughty_video_download(self):
         """This functions helps to download the video at his place and save the details which is needed to save in csv"""
-        
-        
-        collection_path = self.create_or_check_path(self.naughty_america_category_path,sub_folder_=self.naughty.category)
+        collection_path = self.create_or_check_path(self.naughty_america_category_path)
         
         # click on more info
         self.click_element('more info','more-info',By.ID)
@@ -1514,11 +1512,13 @@ class scrapping_bot():
         response = requests.get(post_url)
         with open(os.path.join(collection_path, f'{video_name}.jpg'), 'wb') as f:f.write(response.content)
 
-        
+
         data_dict['Release-Date'] = ""
-        vd_Release_ele = self.find_element('Release date','//*[@id="more-info-container"]/div[1]/p[10]')
+        script_content = self.driver.page_source
+        vd_Release_ele = re.search(r"published_at: '(.*?)'", script_content)
+
         if not vd_Release_ele : SendAnEmail('Could not find pornstars into naughty america!',email=self.emailss)
-        else : data_dict['Release-Date'] = naughty_convert_relative_time(vd_Release_ele.text)
+        else : data_dict['Release-Date'] =  parser.parse(vd_Release_ele.group(1)).date().strftime('%Y-%m-%d')
         
         
         data_dict['Discription'] = ""
@@ -1526,131 +1526,68 @@ class scrapping_bot():
         if not vd_Discription_ele : SendAnEmail('Could not find description into naughty america!',email=self.emailss)
         else : data_dict['Discription'] = vd_Discription_ele.text
         
-        self.set_data_of_csv(self.naughty.website_name,data_dict,video_name)
         
         self.click_element('4k download btn','//*[@id="download-options-menu"]/table/tbody/tr[3]/td[2]/a')
         self.Sovle_captcha()
-        self.find_element('captcha form',"//form[contains(@action, 'captcha')]").submit()
-        self.click_element('download btn', '//*[@type="submit"]')
+
+        self.driver.switch_to.frame(self.find_element('iframe', '//*[@title="reCAPTCHA"]'))
+        self.click_element('captcha', '//*[@class="recaptcha-checkbox-border"]')
+        self.driver.switch_to.default_content()
         
-        # self.random_sleep(10,15,reson="for downloading naughty america videos")
-        self.wait_for_file_download(timeout=30)
-        # self.click_element('download btn','//button[@type="submit" and @disabled="disabled" and contains(@class, "btn-download")]')
+        self.click_element('download btn', '//*[@type="submit"]')
+        file_name = self.wait_for_file_download()
+        self.random_sleep(3,5)
+        name_of_file = os.path.join(self.download_path, f'{video_name}.mp4')
+        os.rename(os.path.join(self.download_path,file_name), name_of_file)
+        self.random_sleep(3,5)
+        self.copy_files_in_catagory_folder(name_of_file,collection_path)
+        self.set_data_of_csv(self.naughty.website_name,data_dict,video_name)
         return True
         
     def naughty_ame(self):
-
         try:
-            download_com_videos = 0
-            videos_cat_url = ''
-            self.driver.get('https://members.naughtyamerica.com/')
-
-            # if self.click_element('Enter naughty america','//*[@id="banner"]/div/div/div[2]/p[1]/a'):
-            #     self.random_sleep(10,15)
-            # if self.find_element('Login',"login", By.ID):
-            if not self.naughty_ame_login() : 
-                SendAnEmail('Could not login into naughty america!',email=self.emailss)
-                return
-            
             if not self.find_element('categories','//*[@id="header-tags"]'):
                 SendAnEmail('Could not find cetegories into naughty america!',email=self.emailss)
                 return
             
+            self.random_sleep()
             categories = []
             for _ in range(3) :
-                categories = self.driver.find_elements(By.XPATH,'//*[@id="header-tags"]/*')
-                if len(categories) > 5 : break
-                self.random_sleep()
-            else:
-                SendAnEmail('Could not find cetegories into naughty america!',email=self.emailss)
-                return
-            
-            # [ i.get_attribute('href') for i in categories if  i.text.lower() == "latina"]
-            
-            for cat in categories : 
-                if cat.text.lower() == self.naughty.category.lower():
-                    videos_cat_url = cat.get_attribute('href')
-                    self.driver.get(videos_cat_url)
+                categories = self.driver.find_element(By.ID,"header-tags").find_elements(By.TAG_NAME, 'a')
+                if len(categories) > 5 : 
+                    print('categories found')
                     break
-            else:
-                SendAnEmail('Could not find cetegories Entered and looking for, into naughty america!',email=self.emailss)
-                return
+                self.random_sleep()
             
-            # for _ in range(5):
-            collection_name = self.naughty.category.lower()
-            all_videos_link_li = self.get_naughty_video_links()
-            for vd_link in all_videos_link_li:
-                self.driver.get(vd_link)
-                post_url = self.find_element('img', "//*[@class='play_image darken-image']").get_attribute('src')
-                tmp = {
-                    "Likes" : "",
-                    "Disclike" :"",
-                    "Url" : vd_link, 
-                    "Category" : collection_name,
-                    "video_download_url" : '',
-                    "Title" : '',
-                    "Discription" : "",
-                    "Release-Date" : "",
-                    "Poster-Image_uri" : post_url,
-                    "poster_download_uri" : '',
-                    "Video-name" : '',
-                    "Photo-name" : '',
-                    "Pornstarts" : '',
-                    "Username" : self.adultprime.website_name,
-                }
-                try:
-                    likes_count = self.find_element('Likes count','//span[@class="up-down-votes"]')
-                    if likes_count :
-                        like_dislike_count = str(likes_count.text).split("/")
-                        tmp['Likes'] = like_dislike_count[0].strip()
-                        tmp['Disclike'] = like_dislike_count[1].strip()
+            for cat in categories :
+                self.driver.execute_script('arguments[0].scrollIntoViewIfNeeded();',cat)
+                if cat.text.lower() == self.naughty.category.lower():
+                    category_url = cat.get_attribute('href')
+                    self.driver.get(category_url)
+                    break
 
-                    script_content = self.driver.page_source
-                    Title =  re.search(r"title: '(.*?)'", script_content)
-                    if Title :
-                        tmp['Title'] = Title.group(1)
+            # pagignation and video download conditions
+            downloaded_vd_url = self.column_to_list(self.naughty.website_name,'Url')
+            all_videos_link_li = 0
+            for _ in range(100):
+                all_videos = [video.get_attribute('href') for video in self.driver.find_elements(By.XPATH, '//*[@style="cursor: pointer"]')]
+                print(f'{len(all_videos)} videos found')
+                for url__ in all_videos:
+                    if url__ in downloaded_vd_url:continue
+                    self.driver.get(url__)
+                    if self.find_element('subscribe', '//*[@class="unlock-button-small"]', timeout=3):
+                        continue
+                    self.naughty_video_download()
+                    all_videos_link_li+= 1
+                    if len(all_videos_link_li) >= self.naughty.numbers_of_download_videos :
+                        return True
 
-                    Release = re.search(r"published_at: '(.*?)'", script_content)
-                    if Release :
-                        tmp['Release-Date'] = Release.group(1)
-
-                    Discription = self.find_element('Discription','//p[@class="update-info-line ap-limited-description-text regular hidden-xs"]')
-                    if Discription :
-                        tmp['Discription'] = Discription.text
-                    
-                    porn_starts = re.search(r"actors: '(.*?)'", script_content)
-                    if porn_starts:
-                        tmp['Pornstarts'] = porn_starts.group(1)
-
-                    video_name = f"adultprime_{collection_name.replace('_videos', '')}_{self.sanitize_title(tmp['Title'])}".replace('adultprime_adultprime','adultprime')
-                    tmp['Photo-name'] = f'{video_name}.jpg'
-                    tmp['Video-name'] = f'{video_name}.mp4'
-
-                    v_url = f'http://208.122.217.49:8000{collection_path.replace(self.base_path,"")}/{video_name}.mp4'.replace('\\', '/')
-                    p_url = f'http://208.122.217.49:8000{collection_path.replace(self.base_path,"")}/{video_name}.jpg'.replace('\\', '/')
-                    tmp['poster_download_uri'] = p_url  
-                    tmp['video_download_url'] = v_url
-
-                    response = requests.get(video_url['post_url'])
-                    with open(os.path.join(collection_path, f'{video_name}.jpg'), 'wb') as f:f.write(response.content)
-    
-                    local_filename =  os.path.join(collection_path, f'{video_name}.mp4')
-                    FullHD_link = self.driver.find_elements(By.XPATH, '//a[@class="stream-quality-selection download-link"]')
-                    if len(FullHD_link) > 2:
-                        decoded_url = FullHD_link[2].get_attribute('href')
-                        self.random_sleep(2,3)
-                        self.download_video_from_request(decoded_url, local_filename)
-                    else:continue
-
-                    self.set_data_of_csv(website_name,tmp,video_name)
-                except Exception as e:
-                    print('Error:', e)
-                # if self.naughty_video_download(): download_com_videos+= 1
-                download_com_videos+= 1
                 
-                if download_com_videos == self.naughty.numbers_of_download_videos:
-                    return True
-            
+                if not self.click_element('View more','view-all-button',By.CLASS_NAME):
+                    SendAnEmail('Could not find more videos into naughty america cetegories!',email=self.emailss)
+                    return
+                
+                self.random_sleep(10,15)
         except Exception as e :
                 SendAnEmail('Could not complete the naughty america scrapping!'+f'\n{e}',email=self.emailss)
     

@@ -13,11 +13,10 @@ class Command(BaseCommand):
         # try:
             emailss = [mail.email for mail in send_mail.objects.all()]
             bot = scrapping_bot(brazzers_bot=True)
-            if bot.starting_bots():
+            if  bot.naughty_ame_login():
                 bot.naughty_ame()
             else:
-                SendAnEmail('Could not open up the driver',email=emailss)
-                return
+                SendAnEmail('Could not login into naughty america!',email=self.emailss)
             
             
             ...
