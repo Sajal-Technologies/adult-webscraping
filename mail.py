@@ -6,7 +6,9 @@ import smtplib
 
 def SendAnEmail(body: str, email=[], attachments=[]):
     obj = sender_mail.objects.first()
-    if not obj : return
+    if not obj :
+        print("Sender email information not found in the database.")
+        return
     sender_email = obj.email
     sender_password = obj.sender_password
     # receiver_email = "rikenkhadela777@gmail.com"  # Replace with the recipient's email address
@@ -15,11 +17,10 @@ def SendAnEmail(body: str, email=[], attachments=[]):
     # sender_password = "sajaltech"
     # receiver_email = "rikenkhadela777@gmail.com"  # Replace with the recipient's email address
     # subject = "Email Of an Error from webscrapping"
-    body = f"""Hello, this is an email from Webscrapping server!\n
+    msg = f"""Hello, this is an email from Webscrapping server!\n
             An error we got : {body}
             Thanks.
             """
-
     if type(email)==list:
         for mail in email:
             # Construct the email message
@@ -27,7 +28,7 @@ def SendAnEmail(body: str, email=[], attachments=[]):
             message["From"] = sender_email
             message["To"] = mail
             message["Subject"] = subject
-            message.attach(MIMEText(body, "plain"))
+            message.attach(MIMEText(msg, "plain"))
             for attachment in attachments:
                 with open(attachment, "rb") as f:
                     img = MIMEImage(f.read())
@@ -43,3 +44,27 @@ def SendAnEmail(body: str, email=[], attachments=[]):
                 print(f"Email sent successfully!\nBody : {body}")
             except Exception as e:
                 print(f"Error: {e}")
+    
+
+
+# sender_email = 'demo@demo.sajaltech.com'
+# sender_password = 'sajaltech'
+# subject = 'Email Of an Error from webscrapping'
+# msg = f"""Hello, this is an email from Webscrapping server!\n
+#         An error we got :
+#         Thanks.
+#         """
+
+# message = MIMEMultipart()
+# message["From"] = sender_email
+# message["To"] = 'vamefi8215@ahieh.com'
+# message["Subject"] = subject
+# message.attach(MIMEText(msg, "plain"))
+# try:
+#     with smtplib.SMTP_SSL("mail.demo.sajaltech.com", 465) as server:
+#         server.login(sender_email, sender_password)
+#         server.sendmail(sender_email, 'vamefi8215@ahieh.com', message.as_string())
+#     print(f"Email sent successfully!\nBody : {msg}")
+# except Exception as e:
+#     print(f"Error: {e}")
+

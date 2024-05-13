@@ -12,12 +12,11 @@ class Command(BaseCommand):
     def handle(self, *args, **options): 
         # try:
             emailss = [mail.email for mail in send_mail.objects.all()]
-            bot = scrapping_bot(brazzers_bot=True)
+            bot = scrapping_bot()
             if  bot.naughty_ame_login():
                 bot.naughty_ame()
             else:
-                SendAnEmail('Could not login into naughty america!',email=self.emailss)
-            
+                SendAnEmail('Could not login into naughty america!',email=emailss)
             
             ...
         # except Exception as e :

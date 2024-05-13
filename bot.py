@@ -1164,7 +1164,6 @@ class scrapping_bot():
         return data
     
     def other_sites_of_handjob(self):
-        from utils import list_files_in_folder
         other_sites_cetegory = [
             "https://handjob.tv/videos/strokies/",
             "https://handjob.tv/videos/tugcasting/",
@@ -1426,20 +1425,25 @@ class scrapping_bot():
         # self.random_sleep(10,15)
         if self.find_element('user btn','//*[@id="right-side-containter"]/div/div[2]/a/i') : 
             return True
-        self.input_text(self.naughty.username,'Username','//*[@id="login-top"]/input[1]')
-        self.input_text(self.naughty.password,'Password','//*[@id="login-top"]/input[2]')
-        # self.click_element('Login','//a[text()="LOGIN"]')
-        self.Sovle_captcha()
-        self.click_element('Login','login', By.ID)
-        self.random_sleep(10,15)
-        self.driver.refresh()
-    
-    
-        if self.find_element('user btn','//*[@id="right-side-containter"]/div/div[2]/a/i'):
-            self.get_cookies(self.naughty.website_name)
-            # member_cookies = [item for item in cookies if item.get("domain") == ".naughtyamerica.com"]
-            # for item in member_cookies:self.driver.add_cookie(item)
-            return True
+        for i in range(3):
+            self.input_text(self.naughty.username,'Username','//*[@id="login-top"]/input[1]')
+            self.input_text(self.naughty.password,'Password','//*[@id="login-top"]/input[2]')
+            # self.click_element('Login','//a[text()="LOGIN"]')
+            self.Sovle_captcha()
+            self.click_element('Login','login', By.ID)
+            account_pause = self.find_element('account pause', '//*[contains(text(),"Account Paused. ")]')
+            if account_pause:
+                SendAnEmail('\n Your Naughty America account is Pause. \nPlease Check that.', email=self.emailss)
+                return False
+            self.random_sleep(10,15)
+            self.driver.refresh()
+        
+
+            if self.find_element('user btn','//*[@id="right-side-containter"]/div/div[2]/a/i'):
+                self.get_cookies(self.naughty.website_name)
+                # member_cookies = [item for item in cookies if item.get("domain") == ".naughtyamerica.com"]
+                # for item in member_cookies:self.driver.add_cookie(item)
+                return True
         
         return False
        
