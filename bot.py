@@ -2016,7 +2016,7 @@ class scrapping_bot():
 
         for website, url in websites.items():
             self.driver.get(url)
-            if website == 'defloratio':
+            if website == 'defloration':
                 self.defloration_videos_download(url)
             elif website == 'flexyteens':
                 self.flexyteens_videos_download()
@@ -2092,5 +2092,6 @@ class scrapping_bot():
             self.driver.get(website_url)
             self.click_element('next btn', 'arrow_next',By.CLASS_NAME)
             website_url = self.driver.current_url
+
 
 
