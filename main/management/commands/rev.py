@@ -12,10 +12,11 @@ class Command(BaseCommand):
     def handle(self, *args, **options): 
         # try:
             emailss = [mail.email for mail in send_mail.objects.all()]
-            bot = scrapping_bot()
-            bot.revsharecash_login()
-            bot.CloseDriver()
-            ...
-        # except Exception as e :
-        #         SendAnEmail(f'Got an error while processing the downloading process the videos of naughty america!\nError : {e}')
+            try:
+                bot = scrapping_bot()
+                bot.revsharecash_login()
+            except Exception as e :
+                    SendAnEmail(f'Got an error while processing the downloading process the videos of naughty america!\nError : {e}')
+            finally:
+                bot.CloseDriver()
 
