@@ -2278,8 +2278,6 @@ class scrapping_bot():
                         file.write(response.content)
 
                     url = block.find_elements(By.XPATH, './/a[contains(@href, "fhd.mp4")]')[1].get_attribute('href')
-                    print(url)
-                    breakpoint()
                     self.download_video_from_request(url, os.path.join(collection_path, tmp['Video-name']))
 
                     self.set_data_of_csv(csv_name, tmp, video_name)
