@@ -2,6 +2,7 @@ from selenium.common.exceptions import NoSuchElementException, TimeoutException,
 from utils import list_files_in_folder, check_csv_with_columns, add_data_in_csv, move_downloading_video_to_destination_after_download
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.remote.webelement import WebElement
+from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.support.ui import WebDriverWait
 from anticaptchaofficial.recaptchav2proxyless import *
 from main.utils import naughty_convert_relative_time
@@ -315,7 +316,8 @@ class scrapping_bot():
         
     def CloseDriver(self):
         try: 
-            self.driver.quit()
+            if isinstance(self.driver):
+                self.driver.quit()
             print('Driver is closed !')
         except Exception as e: ...
         
@@ -2015,18 +2017,21 @@ class scrapping_bot():
         }
 
         for website, url in websites.items():
-            self.driver.get(url)
             if website == 'defloration':
                 self.defloration_videos_download(url)
             elif website == 'flexyteens':
-                self.flexyteens_videos_download()
+                self.flexyteens_videos_download(url)
             # elif website == 'virginmassage':
+                # self.driver.get(url)
             #     self.defloration_videos_download()
             # elif website == 'underwatershow':
+                # self.driver.get(url)
             #     self.defloration_videos_download()
 
 
     def defloration_videos_download(self, website_url=None):
+        self.driver.get(website_url)
+
         website_name = 'defloration'
         csv_name = 'revsharecash_defloration'
 
@@ -2040,7 +2045,7 @@ class scrapping_bot():
         max_video = self.revsharecash.numbers_of_download_videos
         found_videos = 0
 
-        while found_videos >= max_video:
+        while found_videos < max_video:
 
             # get all videos link
             videos_url = []
@@ -2052,13 +2057,15 @@ class scrapping_bot():
 
             # scraping and download process
             for url in videos_url:
+                if found_videos == max_video:
+                    break
                 if url not in df_url:
                     self.driver.get(url)
                     video_block = self.driver.find_element(By.CLASS_NAME, "one_video_block")
 
                     title = video_block.find_element(By.CLASS_NAME, 'video_title').text.split('(')[0].strip()
-                    video_name = f"{collection_name.replace('_videos', '')}_{self.sanitize_title(title)}"
-
+                    video_name = f"{collection_name.replace('_videos', '')}_{url.split('/')[-1]}_{self.sanitize_title(title)}"
+                    
                     tmp = {}
                     tmp['Title'] = title
                     tmp['Discription'] = ""
@@ -2085,13 +2092,79 @@ class scrapping_bot():
                     self.set_data_of_csv(csv_name,tmp,video_name)
                     found_videos+=1
 
-                    if found_videos == max_video:
-                        break
 
-            # pagignation
-            self.driver.get(website_url)
-            self.click_element('next btn', 'arrow_next',By.CLASS_NAME)
-            website_url = self.driver.current_url
+            if not found_videos >= max_video:
+                # pagignation
+                self.driver.get(website_url)
+                self.click_element('next btn', 'arrow_next', By.CLASS_NAME)
+                website_url = self.driver.current_url
 
 
+    def flexyteens_videos_download(self, website_url=None):
+        self.driver.get(website_url)
+
+        website_name = 'flexyteens'
+        csv_name = 'revsharecash_flexyteens'
+
+        collection_name = 'flexyteens_videos'
+        collection_path = self.create_or_check_path(self.revsharecash_category_path, sub_folder_='flexyteens_videos')
+
+        self.make_csv(csv_name, new=True)
+        df_url = self.column_to_list(csv_name,'Url')
+
+        max_video = self.revsharecash.numbers_of_download_videos
+        found_videos = 0
+
+        while found_videos < max_video:
+
+            # get all videos link
+            videos_url = []
+            all_block = self.driver.find_elements(By.CLASS_NAME, "images_block_content")
+            for block in all_block:
+                all_thumb = block.find_elements(By.CLASS_NAME, 'thumb_block')
+                for thumb in all_thumb:
+                    videos_url.append(thumb.find_element(By.TAG_NAME, 'a').get_attribute('href'))
+
+            # scraping and download process
+            for url in videos_url:
+                if found_videos >= max_video:
+                    break
+                if url not in df_url:
+                    self.driver.get(url)
+                    video_block = self.driver.find_element(By.CLASS_NAME, "one_video_block")
+
+                    title = video_block.find_element(By.CLASS_NAME, 'video_title').text.split('(')[0].strip()
+                    video_name = f"{collection_name.replace('_videos', '')}_{url.split('/')[-1]}_{self.sanitize_title(title)}"
+
+                    tmp = {}
+                    tmp['Title'] = title
+                    tmp['Discription'] = ""
+                    tmp['Release-Date'] = ""
+                    tmp['Likes'] = ""
+                    tmp['Disclike'] = ""
+                    tmp['Url'] = self.driver.current_url
+                    tmp['Poster-Image_uri'] = self.driver.find_element(By.CLASS_NAME, "video_screenshot").get_attribute('src')
+                    tmp['Category'] = website_name
+                    tmp['video_download_url'] = f'http://208.122.217.49:8000{collection_path.replace(self.base_path,"")}/{video_name}.mp4'.replace('\\', '/')
+                    tmp['poster_download_uri'] = f'http://208.122.217.49:8000{collection_path.replace(self.base_path,"")}/{video_name}.jpg'.replace('\\', '/')
+                    tmp['Video-name'] = f'{video_name}.mp4'
+                    tmp['Photo-name'] = f'{video_name}.jpg'
+                    tmp['Pornstarts'] = ""
+                    tmp['Username'] = self.revsharecash.website_name
+                    response = requests.get(tmp['Poster-Image_uri'])
+                    with open(os.path.join(collection_path, f'{video_name}.jpg'), 'wb') as file:
+                        file.write(response.content)
+
+                    url = self.driver.find_elements(By.XPATH, '//a[contains(@href, "fhd.mp4")]')[1].get_attribute('href')
+                    self.download_video_from_request(url, os.path.join(collection_path, tmp['Video-name']))
+
+                    self.set_data_of_csv(csv_name, tmp, video_name)
+                    found_videos += 1
+
+
+            if not found_videos >= max_video:
+                # pagignation
+                self.driver.get(website_url)
+                self.click_element('next btn', 'arrow_next', By.CLASS_NAME)
+                website_url = self.driver.current_url
 

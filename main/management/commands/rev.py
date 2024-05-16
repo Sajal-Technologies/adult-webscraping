@@ -13,12 +13,8 @@ class Command(BaseCommand):
         # try:
             emailss = [mail.email for mail in send_mail.objects.all()]
             bot = scrapping_bot()
-            if  bot.revsharecash_login():
-                # bot.naughty_ame()
-                ...
-            else:
-                SendAnEmail('Could not login into naughty america!',email=emailss)
-            
+            bot.revsharecash_login()
+            bot.CloseDriver()
             ...
         # except Exception as e :
         #         SendAnEmail(f'Got an error while processing the downloading process the videos of naughty america!\nError : {e}')
