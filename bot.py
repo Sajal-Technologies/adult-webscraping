@@ -341,7 +341,6 @@ class scrapping_bot():
         vpn_country_list = ['Romania','Netherlands','United States']
         vpn_country = random.choice(vpn_country_list)
         for  _ in range(3):
-            breakpoint()
             self.driver.get('chrome-extension://ffbkglfijbcbgblgflchnbphjdllaogb/index.html')
             self.random_sleep()
 
