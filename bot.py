@@ -315,11 +315,9 @@ class scrapping_bot():
         return value
         
     def CloseDriver(self):
-        try: 
-            if isinstance(self.driver):
-                self.driver.quit()
-            print('Driver is closed !')
-        except Exception as e: ...
+        if isinstance(self.driver, WebDriver):
+            self.driver.quit()
+        print('Driver is closed !')
         
     def calculate_old_date(self, days = 30) : 
         """ get old date from today's by the accepting date and return datetime object"""
@@ -697,13 +695,19 @@ class scrapping_bot():
     def download_brazzer_videos(self, videos_dict,Site_name=''):
         videos_urls = videos_dict['video_list']
         collection_name = videos_dict['collection_name']
-        if 'brazzers_main' in Site_name: 
-            sub_folder = Site_name
-        elif Site_name:
-            sub_folder = collection_name.replace('brazzers_', '')
-        else: sub_folder = None
         csv_name = collection_name if Site_name else self.brazzers.website_name
-        collection_path = self.create_or_check_path(self.brazzers_category_path, sub_folder_=sub_folder)
+
+        if 'brazzers_main' in Site_name: 
+            collection_path = self.create_or_check_path(Site_name)
+            # sub_folder = Site_name
+
+        elif Site_name:
+            collection_path = self.create_or_check_path(collection_name.replace('brazzers_', ''))
+            # sub_folder = collection_name.replace('brazzers_', '')
+
+        else: 
+            collection_path = self.create_or_check_path(self.brazzers_category_path)
+            # sub_folder = None
 
         for idx, video_url in enumerate(videos_urls):
             self.driver.get(video_url['video_url'])

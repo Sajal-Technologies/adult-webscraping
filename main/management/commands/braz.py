@@ -22,8 +22,10 @@ class Command(BaseCommand):
                 if bot.brazzers_login() :
                     logggg = True
                     video_dict = bot.get_brazzers_videos_url()
-                    # bot.brazzers_download_video(video_dict)
                     bot.download_brazzer_videos(video_dict)
+
+                    # bot.brazzers_download_video(video_dict)  # don't uncomment this line 
+
                     bot.download_all_brazzer_channels_video()
                 else:
                     SendAnEmail('Could not logged in into Brazzers')
