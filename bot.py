@@ -165,7 +165,7 @@ class scrapping_bot():
                         'safebrowsing.enabled': True ,
                         "profile.password_manager_enabled": True}
                     self.options.add_experimental_option("prefs", prefs)
-                    self.driver = Chrome(headless=headless, options=self.options)
+                    self.driver = Chrome(headless=headless, options=self.options, version_main=124)
                     break
                 except Exception as e:
                     print(f"Error: {e}")
