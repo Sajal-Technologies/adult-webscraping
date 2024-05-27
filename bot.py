@@ -1102,10 +1102,7 @@ class scrapping_bot():
         self.input_text(self.handjob.category,'password','//input[@id="search"]')
         # self.driver.get(f'https://handjob.tv/search/{self.handjob.category}/')
         if self.find_element('Logout btn','//a[@class="logout"]') :
-            cookies = self.get_cookies(self.vip4k.website_name)
-            member_cookies = [item for item in cookies if item.get("domain") == "handjob.tv"]
-            for item in member_cookies:self.driver.add_cookie(item)
-            
+            self.get_cookies(self.handjob.website_name)
             return True
         else : return False
         
