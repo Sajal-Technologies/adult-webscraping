@@ -1095,12 +1095,12 @@ class scrapping_bot():
     def login_Handjob_TV(self):
         url = "https://handjob.tv/login"
         self.driver.get(url)
-        handjob_obj = configuration.objects.filter(website_name='handjob').first()
-        self.input_text(handjob_obj.username,'username','//input[@id="username"]')
-        self.input_text(handjob_obj.password,'password','//input[@id="password"]')
+        self.click_element('agree btn','verify-age', By.ID)
+        self.input_text(self.handjob.username,'username','//input[@id="username"]')
+        self.input_text(self.handjob.password,'password','//input[@id="password"]')
         self.click_element('Submit btn','//button[@id="login"]')
-        self.input_text(handjob_obj.category,'password','//input[@id="search"]')
-        # self.driver.get(f'https://handjob.tv/search/{handjob_obj.category}/')
+        self.input_text(self.handjob.category,'password','//input[@id="search"]')
+        # self.driver.get(f'https://handjob.tv/search/{self.handjob.category}/')
         if self.find_element('Logout btn','//a[@class="logout"]') :
             cookies = self.get_cookies(self.vip4k.website_name)
             member_cookies = [item for item in cookies if item.get("domain") == "handjob.tv"]
@@ -1154,14 +1154,13 @@ class scrapping_bot():
         vd_title = self.find_element('Video title','video-title',By.CLASS_NAME).text if self.find_element('Video title','video-title',By.CLASS_NAME) else None
 
         video_name = f"{self.handjob.website_name}_{hand_job_category_name}_{self.sanitize_title(vd_title)}"
-        
         data = {       
         "Likes" : "Not available",
         "Disclike" : "Not available",
         "Url" : self.driver.current_url,
         "Title" : self.find_element('Video title','video-title',By.CLASS_NAME).text if self.find_element('Video title','video-title',By.CLASS_NAME) else "could not found the title" ,
         "Discription" : self.find_element('Video title','//div[@style="color: white;"]',By.XPATH).text if self.find_element('Video title','//div[@style="color: white;"]',By.XPATH) else "could not found the description" , #color: white;
-        "Release-Date" : video_info.find_element(By.TAG_NAME,'div').find_elements(By.TAG_NAME,'p')[-1] if video_info else "could not found the added date time", #/html/body/div[4]/div[1]/div
+        "Release-Date" : video_info.find_element(By.TAG_NAME,'div').find_elements(By.TAG_NAME,'p')[-1].text.removeprefix('Added on: ') if video_info else "could not found the added date time", #/html/body/div[4]/div[1]/div
         "Poster-Image_uri" : video_li[-1] if video_li[-1] else "video post img link could not found",
         "poster_download_uri" : f'{self.server_link}downloads/handjob_category_videos/{hand_job_category_name}/{video_name}.jpg',
         "Video-name" : video_name+".mp4",
@@ -1169,7 +1168,7 @@ class scrapping_bot():
         "Photo-name" : f"{self.handjob.website_name}_{hand_job_category_name}_{vd_title}.jpg",
         "Pornstarts" : self.find_element('Pornstar name','model-tags',By.CLASS_NAME).text.replace("Model: ",'') if self.find_element('Pornstar name','model-tags',By.CLASS_NAME) else "Not found porn star",
         "Category" : hand_job_category_name,
-        "Usernam" : self.handjob.username,
+        "Username" : self.handjob.username,
         "downloaded_time" : datetime.now()
         }
                 
@@ -1224,18 +1223,23 @@ class scrapping_bot():
             for vd_link in handjob_not_used_links:
                 self.driver.get(vd_link[0])
                 self.random_sleep(10,15)
+
                 self.driver.find_elements(By.XPATH,'//*[@class="download-full-movie"]/div/*')[-2].click()
                 self.random_sleep(3,5)
+
                 file_name = self.wait_for_file_download()
                 self.random_sleep(3,5)
+
                 video_infor = self.genrate_handjob_a_data_dict(vd_link,hand_job_category_name)
                 name_of_file = os.path.join(self.download_path, video_infor['Video-name'])
+
                 os.rename(os.path.join(self.download_path,file_name), name_of_file)
                 self.random_sleep(3,5)
                 
-                if not os.path.exists(os.path.join(os.getcwd(),'downloads',f'handjon_{hand_job_category_name}')):
-                    os.mkdir(os.path.join(os.getcwd(),'downloads',f'handjon_{hand_job_category_name}'))
-                shutil.move(name_of_file,os.path.join(os.getcwd(),'downloads',f'handjon_{hand_job_category_name}',video_infor['Video-name']))
+                if not os.path.exists(os.path.join(self.download_path,f'handjon_{hand_job_category_name}')):
+                    os.mkdir(os.path.join(self.download_path,f'handjon_{hand_job_category_name}'))
+                
+                shutil.move(name_of_file,os.path.join(self.download_path,f'handjon_{hand_job_category_name}',video_infor['Video-name']))
                 add_data_in_csv(video_infor,details_csv_path)
             
                 
@@ -2069,10 +2073,10 @@ class scrapping_bot():
                     
                     tmp = {}
                     tmp['Title'] = title
-                    tmp['Discription'] = ""
-                    tmp['Release-Date'] = ""
-                    tmp['Likes'] = ""
-                    tmp['Disclike'] = ""
+                    tmp['Discription'] = "Not available"
+                    tmp['Release-Date'] = "Not available"
+                    tmp['Likes'] = "Not available"
+                    tmp['Disclike'] = "Not available"
                     tmp['Url'] = self.driver.current_url
                     tmp['Poster-Image_uri'] = self.driver.find_element(By.CLASS_NAME, "video_screenshot").get_attribute('src')
                     tmp['Category'] = website_name
@@ -2080,7 +2084,7 @@ class scrapping_bot():
                     tmp['poster_download_uri'] = f'http://208.122.217.49:8000{collection_path.replace(self.base_path,"")}/{video_name}.jpg'.replace('\\', '/')
                     tmp['Video-name'] = f'{video_name}.mp4'
                     tmp['Photo-name'] = f'{video_name}.jpg'
-                    tmp['Pornstarts'] = ""
+                    tmp['Pornstarts'] = "Not available"
                     tmp['Username'] = self.revsharecash.website_name
 
                     response = requests.get(tmp['Poster-Image_uri'])
@@ -2139,10 +2143,10 @@ class scrapping_bot():
 
                     tmp = {}
                     tmp['Title'] = title
-                    tmp['Discription'] = ""
-                    tmp['Release-Date'] = ""
-                    tmp['Likes'] = ""
-                    tmp['Disclike'] = ""
+                    tmp['Discription'] = "Not available"
+                    tmp['Release-Date'] = "Not available"
+                    tmp['Likes'] = "Not available"
+                    tmp['Disclike'] = "Not available"
                     tmp['Url'] = self.driver.current_url
                     tmp['Poster-Image_uri'] = self.driver.find_element(By.CLASS_NAME, "video_screenshot").get_attribute('src')
                     tmp['Category'] = website_name
@@ -2150,7 +2154,7 @@ class scrapping_bot():
                     tmp['poster_download_uri'] = f'http://208.122.217.49:8000{collection_path.replace(self.base_path,"")}/{video_name}.jpg'.replace('\\', '/')
                     tmp['Video-name'] = f'{video_name}.mp4'
                     tmp['Photo-name'] = f'{video_name}.jpg'
-                    tmp['Pornstarts'] = ""
+                    tmp['Pornstarts'] = "Not available"
                     tmp['Username'] = self.revsharecash.website_name
 
                     response = requests.get(tmp['Poster-Image_uri'])
@@ -2201,10 +2205,10 @@ class scrapping_bot():
 
                     tmp = {}
                     tmp['Title'] = title
-                    tmp['Discription'] = ""
-                    tmp['Release-Date'] = ""
-                    tmp['Likes'] = ""
-                    tmp['Disclike'] = ""
+                    tmp['Discription'] = "Not available"
+                    tmp['Release-Date'] = "Not available"
+                    tmp['Likes'] = "Not available"
+                    tmp['Disclike'] = "Not available"
                     tmp['Url'] = video_url
                     tmp['Poster-Image_uri'] = block.find_element(By.CLASS_NAME, "video_screenshot").get_attribute('src')
                     tmp['Category'] = website_name
@@ -2212,7 +2216,7 @@ class scrapping_bot():
                     tmp['poster_download_uri'] = f'http://208.122.217.49:8000{collection_path.replace(self.base_path,"")}/{video_name}.jpg'.replace('\\', '/')
                     tmp['Video-name'] = f'{video_name}.mp4'
                     tmp['Photo-name'] = f'{video_name}.jpg'
-                    tmp['Pornstarts'] = ""
+                    tmp['Pornstarts'] = "Not available"
                     tmp['Username'] = self.revsharecash.website_name
 
                     response = requests.get(tmp['Poster-Image_uri'])
@@ -2262,10 +2266,10 @@ class scrapping_bot():
 
                     tmp = {}
                     tmp['Title'] = title
-                    tmp['Discription'] = ""
-                    tmp['Release-Date'] = ""
-                    tmp['Likes'] = ""
-                    tmp['Disclike'] = ""
+                    tmp['Discription'] = "Not available"
+                    tmp['Release-Date'] = "Not available"
+                    tmp['Likes'] = "Not available"
+                    tmp['Disclike'] = "Not available"
                     tmp['Url'] = video_url
                     tmp['Poster-Image_uri'] = block.find_element(By.CLASS_NAME, "video_screenshot").get_attribute('src')
                     tmp['Category'] = website_name
@@ -2273,7 +2277,7 @@ class scrapping_bot():
                     tmp['poster_download_uri'] = f'http://208.122.217.49:8000{collection_path.replace(self.base_path,"")}/{video_name}.jpg'.replace('\\', '/')
                     tmp['Video-name'] = f'{video_name}.mp4'
                     tmp['Photo-name'] = f'{video_name}.jpg'
-                    tmp['Pornstarts'] = ""
+                    tmp['Pornstarts'] = "Not available"
                     tmp['Username'] = self.revsharecash.website_name
 
                     response = requests.get(tmp['Poster-Image_uri'])

@@ -21,8 +21,8 @@ class Command(BaseCommand):
                     return
                 if bot.login_Handjob_TV():
                     logggg = True
-                    bot.handjob_get_video()
                     bot.other_sites_of_handjob()
+                    bot.handjob_get_video()
                 else:
                     SendAnEmail('Could not logged in into Handjob TV')
                 bot.CloseDriver()
