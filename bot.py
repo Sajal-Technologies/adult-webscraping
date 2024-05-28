@@ -784,6 +784,7 @@ class scrapping_bot():
                 seconds+=1
         if not new_video_download: return None
         while True:
+            breakpoint()
             new_files = [i for i in os.listdir(download_dir)if i.endswith('.crdownload')]
             if not new_files:
                 print('download complete')
@@ -1218,6 +1219,7 @@ class scrapping_bot():
                 if len(handjob_not_used_links) > self.handjob.numbers_of_download_videos : break
             
             for vd_link in handjob_not_used_links:
+
                 self.driver.get(vd_link[0])
                 self.random_sleep(10,15)
 
@@ -1233,9 +1235,15 @@ class scrapping_bot():
                 os.rename(os.path.join(self.download_path,file_name), name_of_file)
                 self.random_sleep(3,5)
                 
-                if not os.path.exists(os.path.join(self.download_path,f'handjon_{hand_job_category_name}')):
-                    os.mkdir(os.path.join(self.download_path,f'handjon_{hand_job_category_name}'))
+                collection_path = os.path.join(self.download_path,f'handjon_{hand_job_category_name}')
+                if not os.path.exists(collection_path):
+                    os.mkdir(collection_path)
                 
+                response = requests.get(vd_link[1])
+                if response.status_code == 200:
+                    with open(f'{collection_path}/{video_infor["Video-name"]}.jpg', 'wb') as file:
+                        file.write(response.content)
+
                 shutil.move(name_of_file,os.path.join(self.download_path,f'handjon_{hand_job_category_name}',video_infor['Video-name']))
                 add_data_in_csv(video_infor,details_csv_path)
             
