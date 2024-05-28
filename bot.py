@@ -784,7 +784,6 @@ class scrapping_bot():
                 seconds+=1
         if not new_video_download: return None
         while True:
-            breakpoint()
             new_files = [i for i in os.listdir(download_dir)if i.endswith('.crdownload')]
             if not new_files:
                 print('download complete')
