@@ -16,9 +16,6 @@ class Command(BaseCommand):
                 if bot.whorny_login():
                     logggg = True
                     bot.download_whorny_videos()
-                    # bot.download_all_adultprime_channels_video()
-                    # video_dict = bot.adultprime_get_video()
-                    # bot.adultprime_download_video(video_dict)
                 else :
                     SendAnEmail('Could not logged in into Adult prime')
 

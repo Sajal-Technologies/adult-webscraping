@@ -13,7 +13,7 @@ from selenium.webdriver.common.by import By
 from datetime import datetime, timedelta
 from collections import defaultdict
 # from driver import open_vps_driver
-from seleniumbase import Driver
+# from seleniumbase import Driver
 from urllib.parse import unquote
 from selenium import webdriver
 from bs4 import BeautifulSoup
@@ -872,8 +872,8 @@ class scrapping_bot():
                             
     def vip4k_login(self):
         # self.CloseDriver()
-        # self.get_driver()
-        self.driver = Driver(uc=True, headless=headless)
+        self.get_driver()
+        # self.driver = Driver(uc=True, headless=headless)
         for i in range(3):
             self.driver.get('https://vip4k.com/en/login')
             login = self.find_element('login button','//*[text()="Login"]')
@@ -1177,10 +1177,10 @@ class scrapping_bot():
         "Discription" : self.find_element('Video title','//div[@style="color: white;"]',By.XPATH).text if self.find_element('Video title','//div[@style="color: white;"]',By.XPATH) else "could not found the description" , #color: white;
         "Release-Date" : video_info.find_element(By.TAG_NAME,'div').find_elements(By.TAG_NAME,'p')[-1].text.removeprefix('Added on: ') if video_info else "could not found the added date time", #/html/body/div[4]/div[1]/div
         "Poster-Image_uri" : video_li[-1] if video_li[-1] else "video post img link could not found",
-        "poster_download_uri" : f'{self.server_link}downloads/handjob_category_videos/{hand_job_category_name}/{video_name}.jpg',
+        "poster_download_uri" : f'http://208.122.217.49:8000/downloads/handjob_category_videos/{hand_job_category_name}/{video_name}.jpg',
         "Video-name" : video_name+".mp4",
-        "video_download_uri" : f'{self.server_link}downloads/handjob_category_videos/{hand_job_category_name}/{video_name}.mp4',
-        "Photo-name" : f"{self.handjob.website_name}_{hand_job_category_name}_{vd_title}.jpg",
+        "video_download_url" : f'http://208.122.217.49:8000/downloads/handjob_category_videos/{hand_job_category_name}/{video_name}.mp4',
+        "Photo-name" : video_name + ".jpg",
         "Pornstarts" : self.find_element('Pornstar name','model-tags',By.CLASS_NAME).text.replace("Model: ",'') if self.find_element('Pornstar name','model-tags',By.CLASS_NAME) else "Not found porn star",
         "Category" : hand_job_category_name,
         "Username" : self.handjob.username,
@@ -1262,7 +1262,7 @@ class scrapping_bot():
                         file.write(response.content)
 
                 shutil.move(name_of_file,os.path.join(self.download_path,f'handjon_{hand_job_category_name}',video_infor['Video-name']))
-                add_data_in_csv(video_infor,details_csv_path)
+                self.set_data_of_csv(self.handjob.website_name,video_infor, video_infor["Video-name"])
             
                 
                 
@@ -2221,7 +2221,6 @@ class scrapping_bot():
                 
                 video_url = block.find_element(By.CLASS_NAME, "one_video_block_content").find_element(By.TAG_NAME,'a').get_attribute('href')
                 if video_url not in df_url:
-                    print(video_url)
                     title = block.find_element(By.CLASS_NAME, 'video_title1').text.split('(')[0].strip()
                     video_name = f"{collection_name.replace('_videos', '')}_{video_url.split('/')[-1]}_{self.sanitize_title(title)}"
 
