@@ -1202,9 +1202,10 @@ class scrapping_bot():
         for link in other_sites_cetegory: 
             handjob_not_used_links = []
             hand_job_category_name = link.split('https://handjob.tv/videos/')[-1].replace('/','')
-            details_csv_path = 'handjob_'+link.split('https://handjob.tv/videos/')[-1].replace('/','')+'_videos_details.csv'
-            details_csv_path = os.path.join(os.getcwd(),'csv',details_csv_path)
-            check_csv_with_columns(details_csv_path)
+            details_csv_path = 'handjob_'+link.split('https://handjob.tv/videos/')[-1].replace('/','')
+            # details_csv_path = os.path.join(os.getcwd(),'csv',details_csv_path)
+            # check_csv_with_columns(details_csv_path)
+            self.make_csv(details_csv_path, new=True)
             
             
             self.driver.get(link)
@@ -1217,7 +1218,8 @@ class scrapping_bot():
             if not find_last_pag_num :
                 print("cound not found the find_last_pag_num for hand job other sites of category")
                 continue
-            all_used_link = pd.read_csv(details_csv_path)['Url'].tolist()
+
+            all_used_link = self.column_to_list(details_csv_path,'Url')
             
             for pages in range(int(find_last_pag_num)): 
                 
@@ -1262,7 +1264,7 @@ class scrapping_bot():
                         file.write(response.content)
 
                 shutil.move(name_of_file,os.path.join(self.download_path,f'handjon_{hand_job_category_name}',video_infor['Video-name']))
-                self.set_data_of_csv(self.handjob.website_name,video_infor, video_infor["Video-name"])
+                self.set_data_of_csv( 'handjob_'+link.split('https://handjob.tv/videos/')[-1].replace('/',''),video_infor, video_infor["Video-name"])
             
                 
                 
