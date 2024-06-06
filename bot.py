@@ -13,7 +13,7 @@ from selenium.webdriver.common.by import By
 from datetime import datetime, timedelta
 from collections import defaultdict
 # from driver import open_vps_driver
-# from seleniumbase import Driver
+from seleniumbase import Driver
 from urllib.parse import unquote
 from selenium import webdriver
 from bs4 import BeautifulSoup
@@ -872,8 +872,8 @@ class scrapping_bot():
                             
     def vip4k_login(self):
         # self.CloseDriver()
-        self.get_driver()
-        # self.driver = Driver(uc=True, headless=True)
+        # self.get_driver()
+        self.driver = Driver(uc=True, headless=headless)
         for i in range(3):
             self.driver.get('https://vip4k.com/en/login')
             login = self.find_element('login button','//*[text()="Login"]')
@@ -888,6 +888,24 @@ class scrapping_bot():
                     self.random_sleep(2,3)
                     self.input_text(self.vip4k.password,'password','login-password',By.ID)
                     self.random_sleep(2,3)
+                    # site_key_ele = self.find_element('SITE-KEY','g-recaptcha',By.CLASS_NAME)
+                    # if site_key_ele:
+                    #     solver = recaptchaV2Proxyless()
+                    #     solver.set_verbose(1)
+                    #     solver.set_key("e49c2cc94651faab912d635baec6741f")    
+                    #     breakpoint()
+                    #     # to solvee the captcha
+                    #     site_key = site_key_ele.get_attribute('data-sitekey')
+                    #     solver.set_website_url(self.driver.current_url)
+                    #     solver.set_website_key(site_key)
+                    #     solver.set_soft_id(0)
+                    #     g_response = solver.solve_and_return_solution()
+                        
+                    #     if g_response == 0:
+                    #         print ("task finished of captcha solver with error "+solver.error_code)
+                    #         return False
+                    #     print ("g-response: "+g_response)
+                    #     self.driver.execute_script(f'document.getElementsByName("g-recaptcha-response").innerHTML = "{g_response}";')
                     # iframe = WebDriverWait(self.driver, 10).until(EC.frame_to_be_available_and_switch_to_it((By.XPATH, f'//iframe[@title="reCAPTCHA"]')))
                     # self.driver.execute_script('document.querySelector("#recaptcha-token").click()')
                     # self.driver.switch_to.default_content()
