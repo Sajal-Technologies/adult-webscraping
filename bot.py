@@ -1479,7 +1479,7 @@ class scrapping_bot():
             self.driver.refresh()
         
 
-            if self.find_element('user btn','//*[@id="right-side-containter"]/div/div[2]/a/i'):
+            if self.find_element('Logout btn','//*[text()="Logout"]'):
                 self.get_cookies(self.naughty.website_name)
                 # member_cookies = [item for item in cookies if item.get("domain") == ".naughtyamerica.com"]
                 # for item in member_cookies:self.driver.add_cookie(item)
