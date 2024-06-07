@@ -1,9 +1,10 @@
 from multiprocessing.spawn import import_main_path
 from django.urls import path, include
 from django.views.generic import View
-from django.http import HttpResponse
 from django.conf import Settings, settings
 import os
+from django.http import HttpResponse, HttpResponseNotFound
+from django.core.exceptions import PermissionDenied
 from django.contrib import admin
 from django.conf.urls.static import static
 from main.models import configuration
@@ -55,24 +56,32 @@ def download_file(request, file_path):
         HttpResponse("Folder not found.", status=404)
 
 
-def csv_file(request,file_name):
+def csv_file(request, file_name):
     csv_root = settings.CSV_ROOT
-    files = os.listdir(csv_root)
-    for file in files:
-        if file.endswith('_details.csv') and file_name in file:
-            with open(f'{csv_root}/{file}', 'rb') as f:
-                response = HttpResponse(f.read(), content_type="application/octet-stream")
-                response['Content-Disposition'] = f'attachment; filename="{os.path.basename(file)}"'
-                return response
-    return HttpResponse("csv not found.", status=404)
+    file_path = os.path.join(csv_root, file_name)
+    
+    if not os.path.exists(file_path):
+        return HttpResponseNotFound("CSV file not found.")
+    
+    try:
+        with open(file_path, 'rb') as f:
+            response = HttpResponse(f.read(), content_type="application/octet-stream")
+            response['Content-Disposition'] = f'attachment; filename="{os.path.basename(file_path)}"'
+            return response
+    except PermissionError:
+        raise PermissionDenied("Permission denied to access the CSV file.")
 
-def return_csv_links(requests):
+def return_csv_links(request):
     csv_root = settings.CSV_ROOT
-    files = os.listdir(csv_root)
     file_links = []
-    for file in files:
-        if file.endswith('_details.csv') :
-            file_links.append(f'<a href="/csv/{str(file).replace("_videos_details.csv","")}">{file}</a>')
+
+    for file_name in os.listdir(csv_root):
+        if file_name.endswith('_details.csv'):
+            file_links.append(f'<a href="/csv/{file_name}">{file_name}</a>')
+
+    if not file_links:
+        return HttpResponse("No CSV files found.")
+
     return HttpResponse("<br>".join(file_links))
 
 urlpatterns = [
