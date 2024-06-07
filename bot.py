@@ -1477,7 +1477,6 @@ class scrapping_bot():
                 return False
             self.random_sleep(10,15)
             self.driver.refresh()
-        
 
             if self.find_element('Logout btn','//*[text()="Logout"]'):
                 self.get_cookies(self.naughty.website_name)
@@ -1574,6 +1573,7 @@ class scrapping_bot():
         self.click_element('4k download btn','//*[@id="download-options-menu"]/table/tbody/tr[3]/td[2]/a')
         self.Sovle_captcha()
 
+        self.random_sleep(7,10)
         self.driver.switch_to.frame(self.find_element('iframe', '//*[@title="reCAPTCHA"]'))
         self.click_element('captcha', '//*[@class="recaptcha-checkbox-border"]')
         self.driver.switch_to.default_content()
@@ -2259,62 +2259,69 @@ class scrapping_bot():
                 website_url = self.driver.current_url
     
     def underwatershow_videos_download(self, website_url=None):
-        self.driver.get(website_url)
+        # try:
+            self.driver.get(website_url)
 
-        website_name = 'underwatershow'
-        csv_name = 'revsharecash_underwatershow'
+            website_name = 'underwatershow'
+            csv_name = 'revsharecash_underwatershow'
 
-        collection_name = 'underwatershow_videos'
-        collection_path = self.create_or_check_path(self.revsharecash_category_path, sub_folder_='underwatershow_videos')
+            collection_name = 'underwatershow_videos'
+            collection_path = self.create_or_check_path(self.revsharecash_category_path, sub_folder_='underwatershow_videos')
 
-        self.make_csv(csv_name, new=True)
-        df_url = self.column_to_list(csv_name,'Url')
+            self.make_csv(csv_name, new=True)
+            df_url = self.column_to_list(csv_name,'Url')
 
-        max_video = self.revsharecash.numbers_of_download_videos
-        found_videos = 0
+            max_video = self.revsharecash.numbers_of_download_videos
+            found_videos = 0
 
-        while found_videos < max_video:
+            while found_videos < max_video:
 
-            # get all videos link, scraping and download process
-            all_block = self.driver.find_elements(By.CLASS_NAME, "one_video_block")
-            for block in all_block:
-                if found_videos >= max_video:
-                    break
-                
-                video_url = block.find_element(By.CLASS_NAME, "video_footer").find_element(By.TAG_NAME,'a').get_attribute('href')
-                if video_url not in df_url:
+                # get all videos link, scraping and download process
+                all_block = self.driver.find_elements(By.CLASS_NAME, "one_video_block")
+                for block in all_block:
+                    if found_videos >= max_video:
+                        break
+                    print(block.text)
+                    video_url_dd = block.find_element(By.CLASS_NAME, "video_footer")
+                    if str(video_url_dd.text).strip() == "":
+                        continue
+                    video_url = video_url_dd.find_element(By.TAG_NAME,'a').get_attribute('href')
+                    if video_url not in df_url:
 
-                    title = block.find_element(By.CLASS_NAME, 'video_title1').text.split('(')[0].strip()
-                    video_name = f"{collection_name.replace('_videos', '')}_{video_url.split('/')[-1]}_{self.sanitize_title(title)}"
+                        title = block.find_element(By.CLASS_NAME, 'video_title1').text.split('(')[0].strip()
+                        video_name = f"{collection_name.replace('_videos', '')}_{video_url.split('/')[-1]}_{self.sanitize_title(title)}"
 
-                    tmp = {}
-                    tmp['Title'] = title
-                    tmp['Discription'] = "Not available"
-                    tmp['Release-Date'] = "Not available"
-                    tmp['Likes'] = "Not available"
-                    tmp['Disclike'] = "Not available"
-                    tmp['Url'] = video_url
-                    tmp['Poster-Image_uri'] = block.find_element(By.CLASS_NAME, "video_screenshot").get_attribute('src')
-                    tmp['Category'] = website_name
-                    tmp['video_download_url'] = f'http://208.122.217.49:8000{collection_path.replace(self.base_path,"")}/{video_name}.mp4'.replace('\\', '/')
-                    tmp['poster_download_uri'] = f'http://208.122.217.49:8000{collection_path.replace(self.base_path,"")}/{video_name}.jpg'.replace('\\', '/')
-                    tmp['Video-name'] = f'{video_name}.mp4'
-                    tmp['Photo-name'] = f'{video_name}.jpg'
-                    tmp['Pornstarts'] = "Not available"
-                    tmp['Username'] = self.revsharecash.website_name
+                        tmp = {}
+                        tmp['Title'] = title
+                        tmp['Discription'] = "Not available"
+                        tmp['Release-Date'] = "Not available"
+                        tmp['Likes'] = "Not available"
+                        tmp['Disclike'] = "Not available"
+                        tmp['Url'] = video_url
+                        tmp['Poster-Image_uri'] = block.find_element(By.CLASS_NAME, "video_screenshot").get_attribute('src')
+                        tmp['Category'] = website_name
+                        tmp['video_download_url'] = f'http://208.122.217.49:8000{collection_path.replace(self.base_path,"")}/{video_name}.mp4'.replace('\\', '/')
+                        tmp['poster_download_uri'] = f'http://208.122.217.49:8000{collection_path.replace(self.base_path,"")}/{video_name}.jpg'.replace('\\', '/')
+                        tmp['Video-name'] = f'{video_name}.mp4'
+                        tmp['Photo-name'] = f'{video_name}.jpg'
+                        tmp['Pornstarts'] = "Not available"
+                        tmp['Username'] = self.revsharecash.website_name
 
-                    response = requests.get(tmp['Poster-Image_uri'])
-                    with open(os.path.join(collection_path, f'{video_name}.jpg'), 'wb') as file:
-                        file.write(response.content)
+                        response = requests.get(tmp['Poster-Image_uri'])
+                        with open(os.path.join(collection_path, f'{video_name}.jpg'), 'wb') as file:
+                            file.write(response.content)
 
-                    url = block.find_elements(By.XPATH, './/a[contains(@href, "fhd.mp4")]')[1].get_attribute('href')
-                    self.download_video_from_request(url, os.path.join(collection_path, tmp['Video-name']))
+                        url = block.find_elements(By.XPATH, './/a[contains(@href, "fhd.mp4")]')[1].get_attribute('href')
+                        self.download_video_from_request(url, os.path.join(collection_path, tmp['Video-name']))
 
-                    self.set_data_of_csv(csv_name, tmp, video_name)
-                    found_videos += 1
+                        self.set_data_of_csv(csv_name, tmp, video_name)
+                        found_videos += 1
 
-            if not found_videos >= max_video:
-                # pagignation
-                self.driver.get(website_url)
-                self.click_element('next btn', 'arrow_next', By.CLASS_NAME)
-                website_url = self.driver.current_url
+                if not found_videos >= max_video:
+                    # pagignation
+                    self.driver.get(website_url)
+                    self.click_element('next btn', 'arrow_next', By.CLASS_NAME)
+                    website_url = self.driver.current_url
+        # except Exception as e:
+        #     print(e)
+        #     breakpoint()
