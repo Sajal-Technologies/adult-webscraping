@@ -2325,3 +2325,92 @@ class scrapping_bot():
         # except Exception as e:
         #     print(e)
         #     breakpoint()
+
+    def sexmex_login(self):
+        self.sexmex = configuration.objects.get(website_name='sexmex')
+        self.sexmex_category_path = self.create_or_check_path('sexmex_category_videos')
+
+        self.get_driver()
+        self.driver.get('https://members.sexmex.xxx/members/')
+
+        self.load_cookies(self.sexmex.website_name)
+        if self.find_element('LOGOUT', '//*[text()="LOGOUT"]'):return True
+
+        for i in range(3):
+            self.input_text(self.sexmex.username,'Username','uid', By.NAME)
+            self.input_text(self.sexmex.password,'Password','pwd', By.NAME)
+            self.click_element('submit btn', '//*[@type="submit"]')
+            self.random_sleep(5)
+            if self.find_element('LOGOUT', '//*[text()="LOGOUT"]'):
+                self.get_cookies(self.sexmex.website_name)
+                return True
+        return False
+    
+
+    def sexmax_video_download(self):
+        csv_name = 'sexmex'
+        df_url = self.column_to_list(csv_name,'Url')
+
+        max_video = self.sexmex.numbers_of_download_videos
+        found_videos = 0
+
+        video_list = []
+        self.click_element('see more', 'float-end', By.CLASS_NAME)
+
+        while found_videos < max_video:
+            section = self.find_element('section', '/html/body/div[3]/div[1]')
+            all_div = section.find_elements(By.XPATH, './div')
+            for div in all_div:
+                scene_date = div.find_element(By.CLASS_NAME, 'scene-date').text
+                self.calculate_old_date(self.sexmex.more_than_old_days_download)
+                if self.date_older_or_not(scene_date):
+                    link = div.find_element(By.XPATH, '//h5/a').get_attribute('href')
+                    if link not in df_url:
+                        video_list.append(link)
+                        found_videos+=1
+                    if found_videos == max_video:
+                        break
+
+            if found_videos == max_video:break
+            self.click_element('next', '//*[text()="Next >"]')
+            self.random_sleep(4,7)
+
+
+        for link in video_list:
+            self.driver.get(link)
+            try:
+                video_title = self.find_element('title', '//h4').text
+                video_name = f"sexmex_{self.sanitize_title(video_title)}"
+                discription = self.find_element('description', '//*[@class="panel-body"]/p').text
+                model_name = self.find_element('pornstar', 'update_models', By.CLASS_NAME).text.replace(':', '').strip()
+                v_url = f'http://208.122.217.49:8000{self.sexmex_category_path.replace(self.base_path,"")}/{video_name}.mp4'
+                p_url = f'http://208.122.217.49:8000{self.sexmex_category_path.replace(self.base_path,"")}/{video_name}.jpg'
+                photo_url = self.find_element('photo url','video', By.TAG_NAME).get_attribute('poster')
+                if photo_url:
+                    response = requests.get(photo_url)
+                    with open(os.path.join(self.sexmex_category_path, f'{video_name}.jpg'), 'wb') as f:f.write(response.content)
+
+                tmp = {}
+                tmp['Likes'] = "Not available"
+                tmp['Disclike'] = "Not available"
+                tmp['Url'] = link
+                tmp['Title'] = video_title
+                tmp['Discription'] = discription
+                tmp['Release-Date'] = self.find_element('date', '//*[@class="float-end"]/p').text
+                tmp['Poster-Image_uri'] = photo_url
+                tmp['poster_download_uri'] = p_url
+                tmp['Video-name'] = f'{video_name}.mp4'
+                tmp['video_download_url'] = v_url
+                tmp['Photo-name'] = f'{video_name}.jpg'
+                tmp['Pornstarts'] = model_name     
+                tmp['Category'] = "Not available"
+                tmp['Username'] =  self.sexmex.website_name                      
+                
+                video_url = self.find_element('video url', '//*[text()="1080p"]').get_attribute('value')
+                self.download_video_from_request(video_url, os.path.join(self.sexmex_category_path, f'{video_name}.mp4'))
+
+                self.set_data_of_csv(self.sexmex.website_name,tmp,video_name)
+            except :
+                pass
+
+
