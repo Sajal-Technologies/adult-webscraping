@@ -175,12 +175,31 @@ class scrapping_bot():
     def get_local_driver(self):
         """Start webdriver and return state of it."""
         from selenium import webdriver
+        import undetected_chromedriver as uc
+        # import seleniumwire.undetected_chromedriver as uc
+        user_agents = [
+            # Add your list of user agents here
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36',
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
+            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 13_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15',
+        ]
+
+
         for _ in range(30):
-            self.options = webdriver.ChromeOptions()
-            self.driver_arguments()
+            user_agent = random.choice(user_agents)
+            # self.options = webdriver.ChromeOptions()
+            self.options = uc.ChromeOptions()
+            self.options.add_argument('--blink-settings=imagesEnabled=false')
+            self.options.add_argument(f'user-agent={user_agent}')
+            # self.options.binary_location = 'C:\\Users\\Bhavin\\Downloads\\chromedriver-win64\\chromedriver-win64\\chromedriver.exe'
+            # self.driver_arguments()
             try:
-                # self.driver = uc.Chrome()
-                self.driver = webdriver.Chrome(options=self.options)
+                self.driver = uc.Chrome(use_subprocess=False)
+                # self.driver = webdriver.Chrome(options=self.options)
                 break
             except Exception as e:
                 print(e)
@@ -393,18 +412,18 @@ class scrapping_bot():
 
     def load_cookies(self,website :str):
         try:
-            if 'vip4k' in website:
-                path = os.path.join(self.cookies_path,f'{website}_cookietest.json')
-                if os.path.isfile(path):
-                    with open(path,'rb') as f:cookies = json.load(f)
-                    for item in cookies:
-                        if item.get("domain") == ".vip4k.com":
-                            self.driver.add_cookie(item)
-            else:
-                path = os.path.join(self.cookies_path,f'{website}_cookietest.json')
-                if os.path.isfile(path):
-                    with open(path,'rb') as f:cookies = json.load(f)
-                    for item in cookies: self.driver.add_cookie(item)
+            # if 'vip4k' in website:
+            #     path = os.path.join(self.cookies_path,f'{website}_cookietest.json')
+            #     if os.path.isfile(path):
+            #         with open(path,'rb') as f:cookies = json.load(f)
+            #         for item in cookies:
+            #             if item.get("domain") == ".vip4k.com":
+            #                 self.driver.add_cookie(item)
+            # else:
+            path = os.path.join(self.cookies_path,f'{website}_cookietest.json')
+            if os.path.isfile(path):
+                with open(path,'rb') as f:cookies = json.load(f)
+                for item in cookies: self.driver.add_cookie(item)
             self.driver.refresh()
             self.random_sleep()                
         except : 
@@ -875,19 +894,20 @@ class scrapping_bot():
         self.get_driver()
         # self.driver = Driver(uc=True, headless=headless)
         for i in range(3):
+            self.driver.get('https://www.nowsecure.nl')
             self.driver.get('https://vip4k.com/en/login')
             login = self.find_element('login button','//*[text()="Login"]')
             if login:
                 self.load_cookies(self.vip4k.website_name)
-                self.driver.get('https://vip4k.com/en/login')
                 login = self.find_element('login button','//*[text()="Login"]')
                 if login:
+                    breakpoint()
                     self.click_element('login button','//*[text()="Login"]')
                     self.random_sleep(2,4)
                     self.input_text(self.vip4k.username,'username','login-username',By.ID)
                     self.random_sleep(2,3)
                     self.input_text(self.vip4k.password,'password','login-password',By.ID)
-                    self.random_sleep(2,3)
+                    self.random_sleep(2,3)      
                     # site_key_ele = self.find_element('SITE-KEY','g-recaptcha',By.CLASS_NAME)
                     # if site_key_ele:
                     #     solver = recaptchaV2Proxyless()
@@ -919,7 +939,7 @@ class scrapping_bot():
                     self.click_element('submit','//input[@type="submit"]')
                     self.random_sleep(5,6)
             if self.find_element('check login','//div[@class="logout__text"]'):
-                # cookies = self.get_cookies(self.vip4k.website_name)
+                cookies = self.get_cookies(self.vip4k.website_name)
                 # member_cookies = [item for item in cookies if item.get("domain") != ".vip4k.com"]
                 # for item in member_cookies:self.driver.add_cookie(item)
                 # self.driver.quit()
