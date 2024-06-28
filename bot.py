@@ -12,6 +12,7 @@ from anticaptchaofficial.imagecaptcha import *
 from selenium.webdriver.common.by import By
 from datetime import datetime, timedelta
 from collections import defaultdict
+from twocaptcha import TwoCaptcha
 # from driver import open_vps_driver
 # from seleniumbase import Driver
 from urllib.parse import unquote
@@ -888,7 +889,35 @@ class scrapping_bot():
         for base_name, file_list in base_name_dict.items():
             if len(file_list) == 1:
                 os.remove(file_list[0])
-                            
+
+
+    def solve_2captcha(self,site_key, site_url):
+        solver = TwoCaptcha('6e00098870d05c550b921b362c2abde8')
+        response = solver.turnstile(sitekey=site_key,url=site_url,                             action='challenge',                            useragent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36')
+        # breakpoint()
+        # captcha_url = "http://2captcha.com/in.php"
+        # api_key = '6e00098870d05c550b921b362c2abde8'
+        # captcha_payload = {'key': api_key, 'method': 'turnstile', 'googlekey': site_key, 'pageurl': site_url, "json": 1 }
+        # response = requests.post(captcha_url, data=captcha_payload)
+        if response:
+            captcha = response['code']
+            return captcha
+        else:
+            raise Exception("Error submitting CAPTCHA: " + response.text)
+        
+        # Step 2: Poll for the result
+        # result_url = f"http://2captcha.com/res.php?key={api_key}&action=get&id={captcha_id}"
+        # while True:
+        #     result_response = requests.get(result_url)
+        #     if result_response.text == 'CAPCHA_NOT_READY':
+        #         time.sleep(5)  # wait before trying again
+        #         continue
+        #     if 'OK|' in result_response.text:
+        #         captcha_result = result_response.text.split('|')[1]
+        #         return captcha_result
+
+
+
     def vip4k_login(self):
         # self.CloseDriver()
         self.get_driver()
@@ -901,21 +930,22 @@ class scrapping_bot():
                 self.load_cookies(self.vip4k.website_name)
                 login = self.find_element('login button','//*[text()="Login"]')
                 if login:
-                    breakpoint()
                     self.click_element('login button','//*[text()="Login"]')
                     self.random_sleep(2,4)
                     self.input_text(self.vip4k.username,'username','login-username',By.ID)
                     self.random_sleep(2,3)
                     self.input_text(self.vip4k.password,'password','login-password',By.ID)
                     self.random_sleep(2,3)      
-                    # site_key_ele = self.find_element('SITE-KEY','g-recaptcha',By.CLASS_NAME)
-                    # if site_key_ele:
+                    site_key_ele = self.find_element('SITE-KEY','g-recaptcha',By.CLASS_NAME)
+                    if site_key_ele:
                     #     solver = recaptchaV2Proxyless()
                     #     solver.set_verbose(1)
                     #     solver.set_key("e49c2cc94651faab912d635baec6741f")    
                     #     breakpoint()
                     #     # to solvee the captcha
-                    #     site_key = site_key_ele.get_attribute('data-sitekey')
+                        site_key = site_key_ele.get_attribute('data-sitekey')
+                        g_response = self.solve_2captcha(site_key=site_key, site_url=self.driver.current_url)
+
                     #     solver.set_website_url(self.driver.current_url)
                     #     solver.set_website_key(site_key)
                     #     solver.set_soft_id(0)
@@ -925,7 +955,11 @@ class scrapping_bot():
                     #         print ("task finished of captcha solver with error "+solver.error_code)
                     #         return False
                     #     print ("g-response: "+g_response)
-                    #     self.driver.execute_script(f'document.getElementsByName("g-recaptcha-response").innerHTML = "{g_response}";')
+                        # self.driver.execute_script(f'document.querySelector("#cf-chl-widget-65aqx_g_response").value="{g_response}";')
+                        # self.driver.execute_script(f'document.querySelector("#cf-chl-widget-ixf9o_g_response").value="{g_response}";')
+                        # aa  = self.find_element('response', 'g-recaptcha-response', By.NAME)
+                        self.driver.execute_script(f'''var els=document.getElementsByName("g-recaptcha-response");for (var i=0;i<els.length;i++) {{els[i].value = "{g_response}";}}''')
+                        # self.driver.execute_script(f'document.getElementsByName("g-recaptcha-response").value = "{g_response}";')
                     # iframe = WebDriverWait(self.driver, 10).until(EC.frame_to_be_available_and_switch_to_it((By.XPATH, f'//iframe[@title="reCAPTCHA"]')))
                     # self.driver.execute_script('document.querySelector("#recaptcha-token").click()')
                     # self.driver.switch_to.default_content()
