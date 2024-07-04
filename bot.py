@@ -2477,24 +2477,19 @@ class scrapping_bot():
         self.get_driver()
         for i in range(2):
             self.driver.get('https://members.5kporn.com/login')
-            self.load_cookies(self.fivekteen.website_name, 'https://members.5kporn.com/')
-            if self.find_element('Sign Out', "//button[contains(normalize-space(.), 'Logout')]"):
-                return True
+            # self.load_cookies(self.fivekteen.website_name, 'https://members.5kporn.com/')
+            # if self.find_element('Sign Out', "//button[contains(normalize-space(.), 'Logout')]"):
+            #     return True
             self.input_text(self.fivekteen.username, 'username_input', '//*[@id="username"]')
             self.input_text(self.fivekteen.password, 'password_input','//*[@id="password"]')
             site_key_ele = self.find_element('SITE-KEY','g-recaptcha',By.CLASS_NAME)
             if site_key_ele:
                 site_key = site_key_ele.get_attribute('data-sitekey')
-                solver = recaptchaV2Proxyless()
-                solver.set_verbose(1)
-                solver.set_key("e49c2cc94651faab912d635baec6741f")    
-                solver.set_website_url(self.driver.current_url)
-                solver.set_website_key(site_key)
-                solver.set_soft_id(0)
-                g_response = solver.solve_and_return_solution()
-                breakpoint()
-                self.driver.execute_script('document.getElementById("g-recaptcha-response").innerHTML = "{}";'.format(g_response))
+                solver = TwoCaptcha('6e00098870d05c550b921b362c2abde8')
+                g_response = solver.recaptcha(site_key,'https://members.5kporn.com/login')
 
+                if g_response != 0:
+                    self.driver.execute_script('document.getElementById("g-recaptcha-response").innerHTML = "{}";'.format(g_response['code']))
                 # self.driver.execute_script(f'''var els=document.getElementsByName("g-recaptcha-response");for (var i=0;i<els.length;i++) {{els[i].value = "{g_response}";}}''')
                 # to solvee the captcha
                 # g_response = self.solve_2captcha(site_key=site_key, site_url=self.driver.current_url)
