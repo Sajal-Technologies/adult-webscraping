@@ -2483,6 +2483,7 @@ class scrapping_bot():
             self.input_text(self.fivekteen.username, 'username_input', '//*[@id="username"]')
             self.input_text(self.fivekteen.password, 'password_input','//*[@id="password"]')
             self.click_element('login btn', '//*[@type="submit"]')
+            self.find_element('captcha', '//*[@title="recaptcha challenge expires in two minutes"]')
             if self.find_element('Sign Out', "//button[contains(normalize-space(.), 'Logout')]"):
                 self.get_cookies(self.fivekteen.website_name)
                 return True
