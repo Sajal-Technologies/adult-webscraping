@@ -411,7 +411,7 @@ class scrapping_bot():
                     print(f"Deleted: {file_path}")
         return
 
-    def load_cookies(self,website :str):
+    def load_cookies(self,website :str, redirect_url:str=''):
         try:
             # if 'vip4k' in website:
             #     path = os.path.join(self.cookies_path,f'{website}_cookietest.json')
@@ -425,7 +425,8 @@ class scrapping_bot():
             if os.path.isfile(path):
                 with open(path,'rb') as f:cookies = json.load(f)
                 for item in cookies: self.driver.add_cookie(item)
-            self.driver.refresh()
+            if redirect_url:self.driver.get(redirect_url)
+            else:self.driver.refresh()
             self.random_sleep()                
         except : 
             SendAnEmail('The coockies could not be loaded')
@@ -2468,3 +2469,128 @@ class scrapping_bot():
                 pass
 
 
+    def fivekteen_login(self):
+        self.fivekteen = configuration.objects.get(website_name='5kteen')
+        self.fivekteen_category_path = self.create_or_check_path('fivekteen_category_videos')
+
+        # Login process
+        self.get_driver()
+        for i in range(2):
+            self.driver.get('https://members.5kporn.com/login')
+            self.load_cookies(self.fivekteen.website_name, 'https://members.5kporn.com/')
+            if self.find_element('Sign Out', "//button[contains(normalize-space(.), 'Logout')]"):
+                return True
+            self.input_text(self.fivekteen.username, 'username_input', '//*[@id="username"]')
+            self.input_text(self.fivekteen.password, 'password_input','//*[@id="password"]')
+            self.click_element('login btn', '//*[@type="submit"]')
+            if self.find_element('Sign Out', "//button[contains(normalize-space(.), 'Logout')]"):
+                self.get_cookies(self.fivekteen.website_name)
+                return True
+        return False
+    
+    def download_fivek_teen_video(self):
+        self.calculate_old_date(self.fivekteen.more_than_old_days_download)
+        video_count = self.fivekteen.numbers_of_download_videos
+
+        videos_urls = []
+        df_url = self.column_to_list(self.fivekteen.website_name,'Url')
+
+        page_count = 2
+        while True:
+            self.driver.get('https://members.5kporn.com/?site=2')
+            all_video = self.driver.find_elements(By.XPATH,'//*[@class="ep"]')
+            
+            for video in all_video:
+                date = video.find_element(By.XPATH, './div[1]/div[1]')
+                if self.date_older_or_not(date.text):
+                    video_url = video.find_element(By.XPATH ,'./div[2]/div/a').get_attribute('href')
+                    post_url = video.find_element(By.XPATH ,'./div[2]/div/a/div/img[1]').get_attribute('src')
+                    if post_url and video_url not in df_url and video_count > len(videos_urls):
+                        videos_urls.append({"video_url": video_url, 'post_url': post_url})
+                    if video_count == len(videos_urls):
+                        break
+            if video_count == len(videos_urls):
+                break
+
+            self.driver.get(f'https://members.5kporn.com/?site=2&page={page_count}')
+            page_count+=1
+
+        for item in videos_urls:
+            self.driver.get(item['video_url'])
+            tmp = {}
+
+            video_name = f'''fivek_teen_{self.sanitize_title(self.find_element('title', '//*[contains(text(), "Title:")]').text.split('Title: ')[-1])}'''
+            tmp['Likes'] = 'Not available'
+            tmp['Disclike'] = 'Not available'
+            tmp['Url'] = item['video_url']
+            tmp['Category'] = 'Not available'
+            tmp['Title'] = video_name
+            tmp['Discription'] = self.find_element('Discription', '/html/body/div[2]/div[4]/div[2]/div/div/div[2]').text.split('Episode Summary\n')[-1]
+            tmp['Release-Date'] = self.find_element('release date', '//*[contains(text(), "Published:")]').text.split('Published: ')[-1]
+            tmp['Poster-Image_uri'] = item['post_url']
+            tmp['video_download_url'] = f'http://208.122.217.49:8000{self.fivekteen_category_path.replace(self.base_path,"")}/{video_name}.mp4'
+            tmp['poster_download_uri'] = f'http://208.122.217.49:8000{self.fivekteen_category_path.replace(self.base_path,"")}/{video_name}.jpg'
+            tmp['Video-name'] = f'{video_name}.mp4'
+            tmp['Photo-name'] = f'{video_name}.jpg'
+            tmp['Pornstarts'] = self.find_element('pornstar', '//h5[contains(text(), "Starring:")]').text.split('Starring: ')[-1]
+            tmp['Username'] = self.fivekteen.website_name
+
+            self.click_element('download', '//*[@data-target="#download-modal"]')
+            self.wait_for_file_download()
+
+            self.set_data_of_csv(self.fivekteen.website_name,tmp,video_name)
+
+
+    def download_fivek_porn_video(self):
+        self.calculate_old_date(self.fivekteen.more_than_old_days_download)
+        video_count = self.fivekteen.numbers_of_download_videos
+
+        csv_name = '5kporn'
+        videos_urls = []
+
+        df_url = self.column_to_list(csv_name,'Url')
+        page_count = 2
+
+        while True:
+            self.driver.get('https://members.5kporn.com/?site=1')
+            all_video = self.driver.find_elements(By.XPATH,'//*[@class="ep"]')
+            
+            for video in all_video:
+                date = video.find_element(By.XPATH, './div[1]/div[1]')
+                if self.date_older_or_not(date.text):
+                    video_url = video.find_element(By.XPATH ,'./div[2]/div/a').get_attribute('href')
+                    post_url = video.find_element(By.XPATH ,'./div[2]/div/a/div/img[1]').get_attribute('src')
+                    if post_url and video_url not in df_url and video_count > len(videos_urls):
+                        videos_urls.append({"video_url": video_url, 'post_url': post_url})
+                    if video_count == len(videos_urls):
+                        break
+            if video_count == len(videos_urls):
+                break
+
+            self.driver.get(f'https://members.5kporn.com/?site=1&page={page_count}')
+            page_count+=1
+
+        for item in videos_urls:
+            self.driver.get(item['video_url'])
+            tmp = {}
+
+            video_name = f'''fivek_teen_{self.sanitize_title(self.find_element('title', '//*[contains(text(), "Title:")]').text.split('Title: ')[-1])}'''
+            tmp['Likes'] = 'Not available'
+            tmp['Disclike'] = 'Not available'
+            tmp['Url'] = item['video_url']
+            tmp['Category'] = 'Not available'
+            tmp['Title'] = video_name
+            tmp['Discription'] = self.find_element('Discription', '/html/body/div[2]/div[4]/div[2]/div/div/div[2]').text.split('Episode Summary\n')[-1]
+            tmp['Release-Date'] = self.find_element('release date', '//*[contains(text(), "Published:")]').text.split('Published: ')[-1]
+            tmp['Poster-Image_uri'] = item['post_url']
+            tmp['video_download_url'] = f'http://208.122.217.49:8000{self.fivekteen_category_path.replace(self.base_path,"")}/{video_name}.mp4'
+            tmp['poster_download_uri'] = f'http://208.122.217.49:8000{self.fivekteen_category_path.replace(self.base_path,"")}/{video_name}.jpg'
+            tmp['Video-name'] = f'{video_name}.mp4'
+            tmp['Photo-name'] = f'{video_name}.jpg'
+            tmp['Pornstarts'] = self.find_element('pornstar', '//h5[contains(text(), "Starring:")]').text.split('Starring: ')[-1]
+            tmp['Username'] = self.fivekteen.website_name
+
+            self.click_element('download', '//*[@data-target="#download-modal"]')
+            self.wait_for_file_download()
+
+            self.set_data_of_csv(csv_name,tmp,video_name)
