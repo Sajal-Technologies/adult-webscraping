@@ -2492,6 +2492,7 @@ class scrapping_bot():
                 solver.set_website_key(site_key)
                 solver.set_soft_id(0)
                 g_response = solver.solve_and_return_solution()
+                breakpoint()
                 self.driver.execute_script('document.getElementById("g-recaptcha-response").innerHTML = "{}";'.format(g_response))
 
                 # self.driver.execute_script(f'''var els=document.getElementsByName("g-recaptcha-response");for (var i=0;i<els.length;i++) {{els[i].value = "{g_response}";}}''')
