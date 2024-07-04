@@ -939,13 +939,14 @@ class scrapping_bot():
                     self.random_sleep(2,3)      
                     site_key_ele = self.find_element('SITE-KEY','g-recaptcha',By.CLASS_NAME)
                     if site_key_ele:
-                    #     solver = recaptchaV2Proxyless()
-                    #     solver.set_verbose(1)
-                    #     solver.set_key("e49c2cc94651faab912d635baec6741f")    
+                        solver = recaptchaV2Proxyless()
+                        solver.set_verbose(1)
+                        solver.set_key("e49c2cc94651faab912d635baec6741f")    
                     #     breakpoint()
                     #     # to solvee the captcha
                         site_key = site_key_ele.get_attribute('data-sitekey')
                         g_response = self.solve_2captcha(site_key=site_key, site_url=self.driver.current_url)
+                        self.driver.execute_script(f'''var els=document.getElementsByName("g-recaptcha-response");for (var i=0;i<els.length;i++) {{els[i].value = "{g_response}";}}''')
 
                     #     solver.set_website_url(self.driver.current_url)
                     #     solver.set_website_key(site_key)
@@ -959,7 +960,6 @@ class scrapping_bot():
                         # self.driver.execute_script(f'document.querySelector("#cf-chl-widget-65aqx_g_response").value="{g_response}";')
                         # self.driver.execute_script(f'document.querySelector("#cf-chl-widget-ixf9o_g_response").value="{g_response}";')
                         # aa  = self.find_element('response', 'g-recaptcha-response', By.NAME)
-                        self.driver.execute_script(f'''var els=document.getElementsByName("g-recaptcha-response");for (var i=0;i<els.length;i++) {{els[i].value = "{g_response}";}}''')
                         # self.driver.execute_script(f'document.getElementsByName("g-recaptcha-response").value = "{g_response}";')
                     # iframe = WebDriverWait(self.driver, 10).until(EC.frame_to_be_available_and_switch_to_it((By.XPATH, f'//iframe[@title="reCAPTCHA"]')))
                     # self.driver.execute_script('document.querySelector("#recaptcha-token").click()')
@@ -2482,8 +2482,24 @@ class scrapping_bot():
                 return True
             self.input_text(self.fivekteen.username, 'username_input', '//*[@id="username"]')
             self.input_text(self.fivekteen.password, 'password_input','//*[@id="password"]')
+            site_key_ele = self.find_element('SITE-KEY','g-recaptcha',By.CLASS_NAME)
+            if site_key_ele:
+                site_key = site_key_ele.get_attribute('data-sitekey')
+                solver = recaptchaV2Proxyless()
+                solver.set_verbose(1)
+                solver.set_key("e49c2cc94651faab912d635baec6741f")    
+                solver.set_website_url(self.driver.current_url)
+                solver.set_website_key(site_key)
+                solver.set_soft_id(0)
+                g_response = solver.solve_and_return_solution()
+                self.driver.execute_script('document.getElementById("g-recaptcha-response").innerHTML = "{}";'.format(g_response))
+
+                # self.driver.execute_script(f'''var els=document.getElementsByName("g-recaptcha-response");for (var i=0;i<els.length;i++) {{els[i].value = "{g_response}";}}''')
+                # to solvee the captcha
+                # g_response = self.solve_2captcha(site_key=site_key, site_url=self.driver.current_url)
+                # self.driver.execute_script(f'''var els=document.getElementsByName("g-recaptcha-response");for (var i=0;i<els.length;i++) {{els[i].value = "{g_response}";}}''')
             self.click_element('login btn', '//*[@type="submit"]')
-            self.find_element('captcha', '//*[@title="recaptcha challenge expires in two minutes"]')
+            # self.find_element('captcha', '//*[@title="recaptcha challenge expires in two minutes"]')
             if self.find_element('Sign Out', "//button[contains(normalize-space(.), 'Logout')]"):
                 self.get_cookies(self.fivekteen.website_name)
                 return True
