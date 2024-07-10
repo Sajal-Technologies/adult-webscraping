@@ -2519,11 +2519,15 @@ class scrapping_bot():
         for i in range(2):
             breakpoint()
             self.driver.get('https://members.5kporn.com/login')
+            self.random_sleep()
+            self.driver.refresh()
+            self.random_sleep(10,20)
             # self.load_cookies(self.fivekteen.website_name, 'https://members.5kporn.com/')
             # if self.find_element('Sign Out', "//button[contains(normalize-space(.), 'Logout')]"):
             #     return True
             self.input_text(self.fivekteen.username, 'username_input', '//*[@id="username"]')
             self.input_text(self.fivekteen.password, 'password_input','//*[@id="password"]')
+            # self.click_element('solve captcha', '//button[@id="recaptchaBindedElement0"]')
             # site_key_ele = self.find_element('SITE-KEY','g-recaptcha',By.CLASS_NAME)
             # if site_key_ele:
             #     site_key = site_key_ele.get_attribute('data-sitekey')
@@ -2532,11 +2536,13 @@ class scrapping_bot():
 
             #     if g_response != 0:
             #         self.driver.execute_script('document.getElementById("g-recaptcha-response").innerHTML = "{}";'.format(g_response['code']))
-                # self.driver.execute_script(f'''var els=document.getElementsByName("g-recaptcha-response");for (var i=0;i<els.length;i++) {{els[i].value = "{g_response}";}}''')
-                # to solvee the captcha
-                # g_response = self.solve_2captcha(site_key=site_key, site_url=self.driver.current_url)
-                # self.driver.execute_script(f'''var els=document.getElementsByName("g-recaptcha-response");for (var i=0;i<els.length;i++) {{els[i].value = "{g_response}";}}''')
+            #     self.driver.execute_script(f'''var els=document.getElementsByName("g-recaptcha-response");for (var i=0;i<els.length;i++) {{els[i].value = "{g_response}";}}''')
+            #     self.driver.execute_script(f'''var els=document.getElementsByName("g-recaptcha-response");for (var i=0;i<els.length;i++) {{els[i].value = "{g_response['code']}";}}''')
+            #     # # to solvee the captcha
+            #     g_response = self.solve_2captcha(site_key=site_key, site_url=self.driver.current_url)
+            #     self.driver.execute_script(f'''var els=document.getElementsByName("g-recaptcha-response");for (var i=0;i<els.length;i++) {{els[i].value = "{g_response}";}}''')
             self.click_element('login btn', '//*[@type="submit"]')
+            # self.find_element('login btn', '//*[@type="submit"]')
             # self.find_element('captcha', '//*[@title="recaptcha challenge expires in two minutes"]')
             if self.find_element('Sign Out', "//button[contains(normalize-space(.), 'Logout')]"):
                 self.get_cookies(self.fivekteen.website_name)
