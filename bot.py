@@ -178,6 +178,7 @@ class scrapping_bot():
                         self.options = webdriver.ChromeOptions()
                         self.set_extra_argument()
                         self.options.add_argument(f'user-agent={user_agent}')
+                        self.options.add_argument(f'--headless')
                         self.driver_arguments()
                         try:
                             self.driver = webdriver.Chrome(options=self.options)
