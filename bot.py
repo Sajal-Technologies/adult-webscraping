@@ -45,9 +45,13 @@ class scrapping_bot():
 
         self.server_link = 'http://159.223.134.27:8000/'
         self.emailss = [mail.email for mail in send_mail.objects.all()]
+
+        self.extra_args = []
         self.base_path = os.getcwd()
 
         self.driver = ''
+        self.driver_type = ''
+
         self.download_path = self.create_or_check_path('downloads',main=True)
         [ os.remove(os.path.join(os.getcwd(),'downloads',i)) for i in os.listdir('downloads') if i.endswith('.crdownload')]
 
@@ -106,7 +110,7 @@ class scrapping_bot():
         self.options.add_argument("--ignore-certificate-errors")
         self.options.add_argument("--enable-javascript")
         self.options.add_argument("--enable-popup-blocking")
-        self.options.add_argument(f"download.default_directory={self.base_path}/downloads")
+        # self.options.add_argument(f"download.default_directory={self.base_path}/downloads")
     
     def connect_touchvpn(self,):
         """ Will select any counrty from the following 
@@ -144,39 +148,61 @@ class scrapping_bot():
             return True
         else:
             return False
+        
+    def set_extra_argument(self):
+        if self.extra_args:
+            for arg in self.extra_args:
+                self.options.add_argument(arg)
     
-    def get_driver(self):
+    def get_driver(self,):
         if not headless:
             self.get_local_driver()
             return
             
         else:
             for _ in range(30):
-                from undetected_chromedriver import Chrome, ChromeOptions
+                user_agents = [
+                    # Add your list of user agents here
+                    f'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{random.randint(108,126)}.0.0.0 Safari/537.36',
+                    f'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{random.randint(108,126)}.0.0.0 Safari/537.36',
+                    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
+                    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15',
+                    'Mozilla/5.0 (Macintosh; Intel Mac OS X 13_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15',
+                ]
 
-                """Start webdriver and return state of it."""
-                # self.driver_arguments()                
-                try:
-                    self.options = ChromeOptions()
-                    prefs = {"credentials_enable_service": True,
-                            'profile.default_content_setting_values.automatic_downloads': 1,
-                            "download.default_directory" : f"{self.download_path}",
-                        'download.prompt_for_download': False, 
-                        'download.directory_upgrade': True,
-                        'safebrowsing.enabled': True ,
-                        "profile.password_manager_enabled": True}
-                    self.options.add_experimental_option("prefs", prefs)
-                    self.driver = Chrome(headless=headless, options=self.options, version_main=124)
-                    break
-                except Exception as e:
-                    print(f"Error: {e}")
+
+                if self.driver_type == 'normal':
+                    from selenium import webdriver
+                    for _ in range(30):
+                        user_agent = random.choice(user_agents)
+                        self.options = webdriver.ChromeOptions()
+                        self.set_extra_argument()
+                        self.options.add_argument(f'user-agent={user_agent}')
+                        self.driver_arguments()
+                        try:
+                            self.driver = webdriver.Chrome(options=self.options)
+                            break
+                        except Exception as e:
+                            print(e)
+                else:
+                    import undetected_chromedriver as uc
+                    for _ in range(30):
+                        user_agent = random.choice(user_agents)
+                        self.options = uc.ChromeOptions()
+                        self.set_extra_argument()
+                        self.options.add_argument(f'user-agent={user_agent}')
+                        try:
+                            self.driver = uc.Chrome(use_subprocess=False)
+                            break
+                        except Exception as e:
+                            print(e)
         
             return self.driver
 
     def get_local_driver(self):
-        """Start webdriver and return state of it."""
-        from selenium import webdriver
-        import undetected_chromedriver as uc
+        """### Start webdriver and return state of it.
+            #### if not self.driver_type then it's by default go with undetected chromedriver,
+            #### else use normal selenium driver with extra argument."""
         # import seleniumwire.undetected_chromedriver as uc
         user_agents = [
             # Add your list of user agents here
@@ -190,20 +216,31 @@ class scrapping_bot():
         ]
 
 
-        for _ in range(30):
-            user_agent = random.choice(user_agents)
-            # self.options = webdriver.ChromeOptions()
-            self.options = uc.ChromeOptions()
-            self.options.add_argument('--blink-settings=imagesEnabled=false')
-            self.options.add_argument(f'user-agent={user_agent}')
-            # self.options.binary_location = 'C:\\Users\\Bhavin\\Downloads\\chromedriver-win64\\chromedriver-win64\\chromedriver.exe'
-            # self.driver_arguments()
-            try:
-                self.driver = uc.Chrome(use_subprocess=False)
-                # self.driver = webdriver.Chrome(options=self.options)
-                break
-            except Exception as e:
-                print(e)
+        if self.driver_type == 'normal':
+            from selenium import webdriver
+            for _ in range(30):
+                user_agent = random.choice(user_agents)
+                self.options = webdriver.ChromeOptions()
+                self.set_extra_argument()
+                self.options.add_argument(f'user-agent={user_agent}')
+                self.driver_arguments()
+                try:
+                    self.driver = webdriver.Chrome(options=self.options)
+                    break
+                except Exception as e:
+                    print(e)
+        else:
+            import undetected_chromedriver as uc
+            for _ in range(30):
+                user_agent = random.choice(user_agents)
+                self.options = uc.ChromeOptions()
+                self.set_extra_argument()
+                self.options.add_argument(f'user-agent={user_agent}')
+                try:
+                    self.driver = uc.Chrome(use_subprocess=False)
+                    break
+                except Exception as e:
+                    print(e)
         
         return self.driver
     
@@ -2474,22 +2511,26 @@ class scrapping_bot():
         self.fivekteen_category_path = self.create_or_check_path('fivekteen_category_videos')
 
         # Login process
+        self.driver_type = 'normal'
+        from twocaptcha_extension_python import TwoCaptchas
+        self.extra_args.append(TwoCaptchas(api_key="6e00098870d05c550b921b362c2abde8").load())
         self.get_driver()
         for i in range(2):
+            breakpoint()
             self.driver.get('https://members.5kporn.com/login')
             # self.load_cookies(self.fivekteen.website_name, 'https://members.5kporn.com/')
             # if self.find_element('Sign Out', "//button[contains(normalize-space(.), 'Logout')]"):
             #     return True
             self.input_text(self.fivekteen.username, 'username_input', '//*[@id="username"]')
             self.input_text(self.fivekteen.password, 'password_input','//*[@id="password"]')
-            site_key_ele = self.find_element('SITE-KEY','g-recaptcha',By.CLASS_NAME)
-            if site_key_ele:
-                site_key = site_key_ele.get_attribute('data-sitekey')
-                solver = TwoCaptcha('6e00098870d05c550b921b362c2abde8')
-                g_response = solver.recaptcha(site_key,'https://members.5kporn.com/login')
+            # site_key_ele = self.find_element('SITE-KEY','g-recaptcha',By.CLASS_NAME)
+            # if site_key_ele:
+            #     site_key = site_key_ele.get_attribute('data-sitekey')
+            #     solver = TwoCaptcha('6e00098870d05c550b921b362c2abde8')
+            #     g_response = solver.recaptcha(site_key,'https://members.5kporn.com/login')
 
-                if g_response != 0:
-                    self.driver.execute_script('document.getElementById("g-recaptcha-response").innerHTML = "{}";'.format(g_response['code']))
+            #     if g_response != 0:
+            #         self.driver.execute_script('document.getElementById("g-recaptcha-response").innerHTML = "{}";'.format(g_response['code']))
                 # self.driver.execute_script(f'''var els=document.getElementsByName("g-recaptcha-response");for (var i=0;i<els.length;i++) {{els[i].value = "{g_response}";}}''')
                 # to solvee the captcha
                 # g_response = self.solve_2captcha(site_key=site_key, site_url=self.driver.current_url)

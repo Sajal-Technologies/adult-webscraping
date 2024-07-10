@@ -31,3 +31,4 @@ static/
 *.png
 downloaded_files
 config.json
+extensions
