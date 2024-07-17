@@ -12,6 +12,8 @@ def data_flair(request):
 
 
 class RunScript(View):
+
+
     def get(self, request, *args, **kwargs):
         call_command('update_conf')
         data = {
