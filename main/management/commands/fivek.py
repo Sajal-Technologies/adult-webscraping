@@ -13,6 +13,7 @@ class Command(BaseCommand):
         # try:
             emailss = [mail.email for mail in send_mail.objects.all()]
             bot = scrapping_bot()
+
             if  bot.fivekteen_login():
                 bot.download_fivek_teen_video()
                 bot.download_fivek_porn_video()

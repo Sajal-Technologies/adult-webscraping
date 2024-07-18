@@ -34,10 +34,7 @@ import re
 with open("config.json", "r") as file:
     config = json.load(file)
 
-headless_config = config.get("headless")
-if headless_config == 'True':
-    headless = True
-else: headless = False
+headless = config.get("headless")
 
 class scrapping_bot():
     
@@ -52,7 +49,8 @@ class scrapping_bot():
         self.driver = ''
         self.driver_type = ''
 
-        self.download_path = self.create_or_check_path('downloads',main=True)
+        self.create_or_check_path('downloads',main=True)
+        self.download_path = os.path.join(os.getcwd(),'downloads')
         [ os.remove(os.path.join(os.getcwd(),'downloads',i)) for i in os.listdir('downloads') if i.endswith('.crdownload')]
 
         self.csv_path = self.create_or_check_path('csv',main=True)
@@ -110,6 +108,8 @@ class scrapping_bot():
         self.options.add_argument("--ignore-certificate-errors")
         self.options.add_argument("--enable-javascript")
         self.options.add_argument("--enable-popup-blocking")
+        self.options.add_argument("--incognito")
+
         # self.options.add_argument(f"download.default_directory={self.base_path}/downloads")
     
     def connect_touchvpn(self,):
@@ -170,7 +170,6 @@ class scrapping_bot():
                     'Mozilla/5.0 (Macintosh; Intel Mac OS X 13_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15',
                 ]
 
-
                 if self.driver_type == 'normal':
                     from selenium import webdriver
                     for _ in range(30):
@@ -180,8 +179,15 @@ class scrapping_bot():
                         self.options.add_argument(f'user-agent={user_agent}')
                         self.options.add_argument(f'--headless')
                         self.driver_arguments()
+                        self.options.add_argument(f"download.default_directory={os.path.join(os.getcwd(), 'downloads')}")
+
                         try:
                             self.driver = webdriver.Chrome(options=self.options)
+                            params = {
+                                "behavior": "allow",
+                                "downloadPath": os.path.join(os.getcwd(), 'downloads')
+                            }
+                            self.driver.execute_cdp_cmd("Page.setDownloadBehavior", params)
                             break
                         except Exception as e:
                             print(e)
@@ -192,8 +198,14 @@ class scrapping_bot():
                         self.options = uc.ChromeOptions()
                         self.set_extra_argument()
                         self.options.add_argument(f'user-agent={user_agent}')
+                        self.options.add_argument(f"download.default_directory={os.path.join(os.getcwd(), 'downloads')}")
                         try:
                             self.driver = uc.Chrome(use_subprocess=False)
+                            params = {
+                                "behavior": "allow",
+                                "downloadPath": os.path.join(os.getcwd(), 'downloads')
+                            }
+                            self.driver.execute_cdp_cmd("Page.setDownloadBehavior", params)
                             break
                         except Exception as e:
                             print(e)
@@ -215,8 +227,7 @@ class scrapping_bot():
             'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15',
             'Mozilla/5.0 (Macintosh; Intel Mac OS X 13_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15',
         ]
-
-
+        # self.driver_type = 'normal'
         if self.driver_type == 'normal':
             from selenium import webdriver
             for _ in range(30):
@@ -225,8 +236,16 @@ class scrapping_bot():
                 self.set_extra_argument()
                 self.options.add_argument(f'user-agent={user_agent}')
                 self.driver_arguments()
+                self.options.add_argument("--incognito")
+
+                self.options.add_argument(f"download.default_directory={os.path.join(os.getcwd(),'downloads')}")
                 try:
                     self.driver = webdriver.Chrome(options=self.options)
+                    params = {
+                        "behavior": "allow",
+                        "downloadPath": os.path.join(os.getcwd(), 'downloads')
+                    }
+                    self.driver.execute_cdp_cmd("Page.setDownloadBehavior", params)
                     break
                 except Exception as e:
                     print(e)
@@ -237,8 +256,16 @@ class scrapping_bot():
                 self.options = uc.ChromeOptions()
                 self.set_extra_argument()
                 self.options.add_argument(f'user-agent={user_agent}')
+                self.options.add_argument("--incognito")
+                self.options.add_argument(f"download.default_directory={os.path.join(os.getcwd(),'downloads')}")
+
                 try:
                     self.driver = uc.Chrome(use_subprocess=False)
+                    params = {
+                        "behavior": "allow",
+                        "downloadPath": os.path.join(os.getcwd(),'downloads')
+                    }
+                    self.driver.execute_cdp_cmd("Page.setDownloadBehavior", params)
                     break
                 except Exception as e:
                     print(e)
@@ -473,6 +500,9 @@ class scrapping_bot():
         path = os.path.join(self.cookies_path,f'{website}_cookietest.json')
         cookies = self.driver.get_cookies()
         with open(path, 'w', newline='') as outputdata:
+            if website == "5kteen" :
+                cookies[0]['expiry'] +=172800
+
             json.dump(cookies, outputdata)
         return cookies
             
@@ -933,7 +963,6 @@ class scrapping_bot():
     def solve_2captcha(self,site_key, site_url):
         solver = TwoCaptcha('6e00098870d05c550b921b362c2abde8')
         response = solver.turnstile(sitekey=site_key,url=site_url,                             action='challenge',                            useragent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36')
-        # breakpoint()
         # captcha_url = "http://2captcha.com/in.php"
         # api_key = '6e00098870d05c550b921b362c2abde8'
         # captcha_payload = {'key': api_key, 'method': 'turnstile', 'googlekey': site_key, 'pageurl': site_url, "json": 1 }
@@ -974,13 +1003,12 @@ class scrapping_bot():
                     self.input_text(self.vip4k.username,'username','login-username',By.ID)
                     self.random_sleep(2,3)
                     self.input_text(self.vip4k.password,'password','login-password',By.ID)
-                    self.random_sleep(2,3)      
+                    self.random_sleep(2,3)
                     site_key_ele = self.find_element('SITE-KEY','g-recaptcha',By.CLASS_NAME)
                     if site_key_ele:
                         solver = recaptchaV2Proxyless()
                         solver.set_verbose(1)
                         solver.set_key("e49c2cc94651faab912d635baec6741f")    
-                    #     breakpoint()
                     #     # to solvee the captcha
                         site_key = site_key_ele.get_attribute('data-sitekey')
                         g_response = self.solve_2captcha(site_key=site_key, site_url=self.driver.current_url)
@@ -2110,6 +2138,20 @@ class scrapping_bot():
             if not next_btn:break
 
 
+    def pegas_download_videos(self):
+        self.pegas.category
+        all_cetegory = self.driver.find_elements(By.XPATH,'//*[@id="module-de-recherche-videos"]/div[2]/div[1]/div[1]/form/select/*')
+        category = [i for i in all_cetegory if self.pegas.category.lower() in i.text.lower()]
+        if not category:
+            category = random.choice(all_cetegory[2:])
+        else :
+            category = category[0]
+
+        category.click()
+        allvideos = self.driver.find_elements(By.CLASS_NAME,"rollover_img_videotour")
+        if allvideos : ...
+
+
     def pegas_login(self):
         self.pegas = configuration.objects.get(website_name='pegas')
         self.pegas_category_path = self.create_or_check_path('pegas_category_videos')
@@ -2117,14 +2159,33 @@ class scrapping_bot():
         self.get_driver()
         # self.connect_vpn()
         # 'https://www.pegasproductions.com/front?lang=en&chlg=1&langue=en&nats='
-        breakpoint()
-        self.driver.get('https://www.pegasproductions.com/tube?lang=en&type=scenes&order=dateup&langue=en')
+        self.driver.get('https://www.pegasproductions.com/')
+
         
-        
-        if self.find_element('login btn', '//a[contains(text(),"login")]'):
+        if self.click_element('login btn', '//div[@class="connexion"]'):
+            self.random_sleep()
             self.input_text(self.pegas.username, 'username','//input[@type="text"]')
             self.input_text(self.pegas.password, 'password','//input[@type="password"]')
-            self.click_element('username','//input[@type="submit"]')
+            # self.click_element('username','//input[@type="submit"]')
+
+            self.pegas_download_videos()
+            # captcha part
+            url = "https://members.5kporn.com/login"
+            API_KEY = '6e00098870d05c550b921b362c2abde8'
+            solver = TwoCaptcha(API_KEY)
+
+            site_key_ele = self.find_element('SITE-KEY', 'g-recaptcha', By.CLASS_NAME)
+            site_key = site_key_ele.get_attribute('data-sitekey')
+            result = solver.recaptcha(sitekey=site_key, url=url)
+            recaptcha_response = result['code']
+            self.driver.execute_script('document.getElementById("g-recaptcha-response").innerHTML = arguments[0]',
+                                       recaptcha_response)
+
+            self.click_element('login btn', '//*[@type="submit"]')
+
+            if self.find_element('Log out btn','//a[@href="https://pegasproductions.com/front/?logout=1"]') :
+                self.get_cookies('pages')
+
 
 
     def revsharecash_login(self):
@@ -2417,7 +2478,6 @@ class scrapping_bot():
                     website_url = self.driver.current_url
         # except Exception as e:
         #     print(e)
-        #     breakpoint()
 
     def sexmex_login(self):
         self.sexmex = configuration.objects.get(website_name='sexmex')
@@ -2507,24 +2567,34 @@ class scrapping_bot():
                 pass
 
 
-    def fivekteen_login(self):
+    def fivekteen_login2(self):
+
+        def get_captcha_token(site_key):
+            from twocaptcha_extension_python import TwoCaptcha
+            self.extra_args.append(TwoCaptcha(api_key="6e00098870d05c550b921b362c2abde8").load())
+            solver = TwoCaptcha('6e00098870d05c550b921b362c2abde8')
+            g_response = solver.recaptcha(site_key, 'https://members.5kporn.com/login')
+
         self.fivekteen = configuration.objects.get(website_name='5kteen')
         self.fivekteen_category_path = self.create_or_check_path('fivekteen_category_videos')
 
         # Login process
         self.driver_type = 'normal'
-        from twocaptcha_extension_python import TwoCaptchas
-        self.extra_args.append(TwoCaptchas(api_key="6e00098870d05c550b921b362c2abde8").load())
+
         self.get_driver()
         for i in range(2):
-            breakpoint()
-            self.driver.get('https://members.5kporn.com/login')
-            self.random_sleep()
-            self.driver.refresh()
-            self.random_sleep(10,20)
+
+            self.driver.get('https://members.5kporn.com/')
             # self.load_cookies(self.fivekteen.website_name, 'https://members.5kporn.com/')
-            # if self.find_element('Sign Out', "//button[contains(normalize-space(.), 'Logout')]"):
-            #     return True
+
+            self.random_sleep()
+
+            if self.find_element('Sign Out', "//button[contains(normalize-space(.), 'Logout')]"):
+                self.get_cookies(self.fivekteen.website_name)
+                return True
+            else :
+                self.driver.get('https://members.5kporn.com/login') if not self.driver.current_url == 'https://members.5kporn.com/login' else None
+
             self.input_text(self.fivekteen.username, 'username_input', '//*[@id="username"]')
             self.input_text(self.fivekteen.password, 'password_input','//*[@id="password"]')
             # self.click_element('solve captcha', '//button[@id="recaptchaBindedElement0"]')
@@ -2544,6 +2614,92 @@ class scrapping_bot():
             self.click_element('login btn', '//*[@type="submit"]')
             # self.find_element('login btn', '//*[@type="submit"]')
             # self.find_element('captcha', '//*[@title="recaptcha challenge expires in two minutes"]')
+            if self.find_element('Sign Out', "//button[contains(normalize-space(.), 'Logout')]"):
+                self.get_cookies(self.fivekteen.website_name)
+                return True
+        return False
+
+    def fivekteen_login(self):
+        clientKey = "6e00098870d05c550b921b362c2abde8"
+
+        def get_site_key():
+            site_key_ele = self.find_element('SITE-KEY', 'g-recaptcha', By.CLASS_NAME)
+            if site_key_ele:
+                site_key = site_key_ele.get_attribute('data-sitekey')
+        def create_2captcha_task(websiteKey,websiteURL="https://members.5kporn.com/login"):
+
+            url = "https://api.2captcha.com/createTask"
+
+            payload = json.dumps({
+                "clientKey": clientKey,
+                "task": {
+                    "type": "RecaptchaV2TaskProxyless",
+                    "websiteURL": websiteURL,
+                    "websiteKey": websiteKey
+                }
+            })
+            headers = {
+                'Content-Type': 'application/json'
+            }
+
+            response = requests.request("POST", url, headers=headers, data=payload)
+            return json.loads(response.text)
+
+        def get_2captcha_task_result(taskId):
+            url = "https://api.2captcha.com/getTaskResult"
+
+            for _ in range(10):
+
+                payload = json.dumps({
+                    "clientKey": clientKey,
+                    "taskId": taskId
+                })
+                headers = {
+                    'Content-Type': 'application/json'
+                }
+
+                response = requests.request("POST", url, headers=headers, data=payload)
+                response = json.loads(response.text)
+                if response['status'] == "ready" :
+                    return response
+
+
+
+        self.fivekteen = configuration.objects.get(website_name='5kteen')
+        self.fivekteen_category_path = self.create_or_check_path('fivekteen_category_videos')
+        # Login process
+        # self.driver_type = 'normal'
+
+        self.get_driver()
+        for i in range(2):
+
+            self.driver.get('https://members.5kporn.com/')
+            self.load_cookies(self.fivekteen.website_name, 'https://members.5kporn.com/')
+
+            self.random_sleep()
+
+            if self.find_element('Sign Out', "//button[contains(normalize-space(.), 'Logout')]"):
+                self.get_cookies(self.fivekteen.website_name)
+                return True
+            else :
+                self.driver.get('https://members.5kporn.com/login') if not self.driver.current_url == 'https://members.5kporn.com/login' else None
+                # return False
+
+
+            self.input_text(self.fivekteen.username, 'username_input', '//*[@id="username"]')
+            self.input_text(self.fivekteen.password, 'password_input','//*[@id="password"]')
+            url = "https://members.5kporn.com/login"
+            API_KEY = '6e00098870d05c550b921b362c2abde8'
+            solver = TwoCaptcha(API_KEY)
+
+            site_key_ele = self.find_element('SITE-KEY', 'g-recaptcha', By.CLASS_NAME)
+            site_key = site_key_ele.get_attribute('data-sitekey')
+            result = solver.recaptcha(sitekey=site_key, url=url)
+            recaptcha_response = result['code']
+            self.driver.execute_script('document.getElementById("g-recaptcha-response").innerHTML = arguments[0]',recaptcha_response)
+
+            self.click_element('login btn', '//*[@type="submit"]')
+            self.random_sleep()
             if self.find_element('Sign Out', "//button[contains(normalize-space(.), 'Logout')]"):
                 self.get_cookies(self.fivekteen.website_name)
                 return True
@@ -2595,10 +2751,16 @@ class scrapping_bot():
             tmp['Photo-name'] = f'{video_name}.jpg'
             tmp['Pornstarts'] = self.find_element('pornstar', '//h5[contains(text(), "Starring:")]').text.split('Starring: ')[-1]
             tmp['Username'] = self.fivekteen.website_name
-
             self.click_element('download', '//*[@data-target="#download-modal"]')
-            self.wait_for_file_download()
+            download_table = self.find_element('Download table','download-modal',By.ID)
+            if download_table:
+                self.click_element('Best quality download video','//*[@id="collapseEPS"]/div/ul/li')
+            name_of_file = tmp['Video-name']
+            file_name = self.wait_for_file_download()
 
+            if not os.path.exists(os.path.join(self.download_path,'fivekteen_category_videos','teen')):
+                os.makedirs(os.path.join(self.download_path,'fivekteen_category_videos','teen'))
+            os.rename(os.path.join(self.download_path, file_name), os.path.join(self.download_path,'fivekteen_category_videos','teen', name_of_file))
             self.set_data_of_csv(self.fivekteen.website_name,tmp,video_name)
 
 
@@ -2652,6 +2814,26 @@ class scrapping_bot():
             tmp['Username'] = self.fivekteen.website_name
 
             self.click_element('download', '//*[@data-target="#download-modal"]')
-            self.wait_for_file_download()
+            download_table = self.find_element('Download table', 'download-modal', By.ID)
+            if download_table:
+                self.click_element('Best quality download video', '//*[@id="collapseEPS"]/div/ul/li')
+
+            name_of_file = tmp['Video-name']
+            file_name = self.wait_for_file_download()
+
+            if not os.path.exists(os.path.join(self.download_path, 'fivekteen_category_videos', 'videos')):
+                os.makedirs(os.path.join(self.download_path, 'fivekteen_category_videos', 'videos'))
+            os.rename(os.path.join(self.download_path, file_name),
+                      os.path.join(self.download_path, 'fivekteen_category_videos', 'videos', name_of_file))
+            self.set_data_of_csv(self.fivekteen.website_name, tmp, video_name)
 
             self.set_data_of_csv(csv_name,tmp,video_name)
+
+
+    def test_captcha(self):
+        self.get_driver()
+        self.driver.get('https://www.google.com/recaptcha/api2/demo')
+        self.driver.refresh()
+
+
+        pass
