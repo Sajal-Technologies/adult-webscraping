@@ -193,21 +193,22 @@ class scrapping_bot():
                             print(e)
                 else:
                     import undetected_chromedriver as uc
-                    for _ in range(30):
-                        user_agent = random.choice(user_agents)
-                        self.options = uc.ChromeOptions()
-                        self.set_extra_argument()
-                        self.options.add_argument(f'user-agent={user_agent}')
-                        self.options.add_argument(f"download.default_directory={os.path.join(os.getcwd(), 'downloads')}")
-                        try:
-                            self.driver = uc.Chrome(use_subprocess=False)
-                            params = {
-                                "behavior": "allow",
-                                "downloadPath": os.path.join(os.getcwd(), 'downloads')
-                            }
-                            self.driver.execute_cdp_cmd("Page.setDownloadBehavior", params)
-                            break
-                        except Exception as e:
+                    user_agent = random.choice(user_agents)
+                    self.options = uc.ChromeOptions()
+                    self.set_extra_argument()
+                    self.options.add_argument(f'user-agent={user_agent}')
+                    self.options.add_argument(f"download.default_directory={os.path.join(os.getcwd(), 'downloads')}")
+                    try:
+                        self.driver = uc.Chrome(use_subprocess=False)
+                        params = {
+                            "behavior": "allow",
+                            "downloadPath": os.path.join(os.getcwd(), 'downloads')
+                        }
+                        self.driver.execute_cdp_cmd("Page.setDownloadBehavior", params)
+                        break
+                    except Exception as e:
+
+
                             print(e)
         
             return self.driver
@@ -507,6 +508,7 @@ class scrapping_bot():
         return cookies
             
     def brazzers_login(self):
+        breakpoint()
         self.load_cookies(self.brazzers.website_name)
         while True :
             try:
