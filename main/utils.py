@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import re
+import subprocess
 
 def naughty_convert_relative_time(relative_time):
     # Define regular expression pattern to extract numerical value and time unit
@@ -28,3 +29,14 @@ def naughty_convert_relative_time(relative_time):
         formatted_date = date.strftime("%b %d, %Y")
 
         return formatted_date
+
+def run_command(command):
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+    return result.stdout, result.stderr
+def get_chrome_version():
+    command = "google-chrome --version"
+    stdout, stderr = run_command(command)
+
+    print("Standard Output:", stdout.strip().split(' ')[-1].split('.')[0])
+    pass
+

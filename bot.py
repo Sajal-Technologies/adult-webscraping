@@ -5,7 +5,7 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.chrome.webdriver import WebDriver
 from selenium.webdriver.support.ui import WebDriverWait
 from anticaptchaofficial.recaptchav2proxyless import *
-from main.utils import naughty_convert_relative_time
+from main.utils import naughty_convert_relative_time, get_chrome_version
 from main.models import configuration, send_mail
 from selenium.webdriver.common.keys import Keys
 from anticaptchaofficial.imagecaptcha import *
@@ -199,7 +199,7 @@ class scrapping_bot():
                     self.options.add_argument(f'user-agent={user_agent}')
                     self.options.add_argument(f"download.default_directory={os.path.join(os.getcwd(), 'downloads')}")
                     try:
-                        self.driver = uc.Chrome(use_subprocess=False)
+                        self.driver = uc.Chrome(use_subprocess=False, headless=True, version_main=get_chrome_version())
                         params = {
                             "behavior": "allow",
                             "downloadPath": os.path.join(os.getcwd(), 'downloads')
@@ -508,7 +508,6 @@ class scrapping_bot():
         return cookies
             
     def brazzers_login(self):
-        breakpoint()
         self.load_cookies(self.brazzers.website_name)
         while True :
             try:
@@ -2688,19 +2687,20 @@ class scrapping_bot():
                 # return False
 
 
+
+
             self.input_text(self.fivekteen.username, 'username_input', '//*[@id="username"]')
-            self.input_text(self.fivekteen.password, 'password_input','//*[@id="password"]')
+            self.input_text(self.fivekteen.password, 'password_input', '//*[@id="password"]')
             url = "https://members.5kporn.com/login"
             API_KEY = '6e00098870d05c550b921b362c2abde8'
             solver = TwoCaptcha(API_KEY)
-
             site_key_ele = self.find_element('SITE-KEY', 'g-recaptcha', By.CLASS_NAME)
             site_key = site_key_ele.get_attribute('data-sitekey')
             result = solver.recaptcha(sitekey=site_key, url=url)
             recaptcha_response = result['code']
             self.driver.execute_script('document.getElementById("g-recaptcha-response").innerHTML = arguments[0]',recaptcha_response)
-
-            self.click_element('login btn', '//*[@type="submit"]')
+            sub_btn = self.find_element('login btn', '//*[@type="submit"]')
+            sub_btn.submit()
             self.random_sleep()
             if self.find_element('Sign Out', "//button[contains(normalize-space(.), 'Logout')]"):
                 self.get_cookies(self.fivekteen.website_name)
