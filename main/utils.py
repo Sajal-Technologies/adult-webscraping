@@ -37,6 +37,6 @@ def get_chrome_version():
     command = "google-chrome --version"
     stdout, stderr = run_command(command)
 
-    print("Standard Output:", stdout.strip().split(' ')[-1].split('.')[0])
-    pass
+    return int(stdout.strip().split(' ')[-1].split('.')[0])
+    
 
