@@ -19,4 +19,6 @@ class Command(BaseCommand):
                     SendAnEmail(f'Got an error while processing the downloading process the videos of naughty america!\nError : {e}')
             finally:
                 bot.CloseDriver()
+                
+                
 
