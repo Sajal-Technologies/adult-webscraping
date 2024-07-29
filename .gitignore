@@ -32,5 +32,4 @@ static/
 downloaded_files
 config.json
 extensions
-
-cookies/*
+cookies

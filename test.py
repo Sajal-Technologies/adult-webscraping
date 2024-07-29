@@ -49,6 +49,7 @@ class vip4k:
             if '/en/channels/' in href_value and any(channel in href_value for channel in all_channel):
                 all_link.append(href_value)
         
+        breakpoint()
 
     async def work(self):
         await self.get_driver()

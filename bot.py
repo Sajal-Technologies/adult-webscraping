@@ -155,6 +155,7 @@ class scrapping_bot():
                 self.options.add_argument(arg)
     
     def get_driver(self,):
+        headless = False
         if not headless:
             self.get_local_driver()
             return
@@ -2510,6 +2511,7 @@ class scrapping_bot():
 
         video_list = []
         self.click_element('see more', 'float-end', By.CLASS_NAME)
+
         while found_videos < max_video:
             section = self.find_element('section', '/html/body/div[3]/div[1]')
             all_div = section.find_elements(By.XPATH, './div')
@@ -2542,6 +2544,7 @@ class scrapping_bot():
                 if photo_url:
                     response = requests.get(photo_url)
                     with open(os.path.join(self.sexmex_category_path, f'{video_name}.jpg'), 'wb') as f:f.write(response.content)
+
                 tmp = {}
                 tmp['Likes'] = "Not available"
                 tmp['Disclike'] = "Not available"
