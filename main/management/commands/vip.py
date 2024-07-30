@@ -16,7 +16,6 @@ class Command(BaseCommand):
                 bot = scrapping_bot(brazzers_bot=False)
                 print('Vip 4k process')
                 if bot.vip4k_login():
-                    breakpoint()
                     logggg = True
                     # all_channel = ["Black4k", "Bride4k", "Cuck4k", "Daddy4k","Debt4k", "Dyke4k", "Fist4k", "Loan4k", "Mature4k", "Old4k", "Pie4k", "Rim4k", "Shame4k", "Sis","Stuck4k", "Tutor4k", "Vip4k"]
                     bot.download_all_vip_channels_video()

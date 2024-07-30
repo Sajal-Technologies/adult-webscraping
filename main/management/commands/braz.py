@@ -22,7 +22,6 @@ class Command(BaseCommand):
                     return
                 if bot.brazzers_login() :
                     logggg = True
-                    breakpoint()
                     video_dict = bot.get_brazzers_videos_url()
                     bot.download_brazzer_videos(video_dict)
 
