@@ -7,4 +7,13 @@ killall -9 python qemu-system-x86_64
 
 
 python manage.py delete
+
+python manage.py braz
+python manage.py hand
+python manage.py prime
+python manage.py fivek
+python manage.py rev
+python manage.py sexmax
+python manage.py vip
+python manage.py whorny
 python manage.py update_conf
