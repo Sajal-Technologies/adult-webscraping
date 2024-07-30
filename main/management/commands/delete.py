@@ -103,9 +103,13 @@ class Command(BaseCommand):
                         self.data[file_path].append(vd_name)
                         self.all_not_need_dele_videos.append(vd_name)
                         df = df.drop(idx)
+                        df.to_csv(file_path)
+
 
     def create_dict_videos_from_db(self):
         all_videos_collection = videos_collection.objects.all()
         for vid in all_videos_collection:
             if not self.is_more_than_last_two_days_datetime(vid.created, 2):
                 self.all_not_need_dele_videos.append(vid.Video_name)
+            else:
+                vid.delete()
