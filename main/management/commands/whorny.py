@@ -12,6 +12,11 @@ class Command(BaseCommand):
         for _ in range(1):
             try:
                 bot = scrapping_bot()
+                driver = bot.starting_bots()
+                if not driver:
+                    SendAnEmail('Could not open up the driver')
+                    return
+
                 print('whorny process starting')
                 if bot.whorny_login():
                     logggg = True

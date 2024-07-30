@@ -13,6 +13,12 @@ class Command(BaseCommand):
         # try:
             emailss = [mail.email for mail in send_mail.objects.all()]
             bot = scrapping_bot()
+
+            driver = bot.starting_bots()
+            if not driver:
+                SendAnEmail('Could not open up the driver')
+                return
+
             if  bot.sexmex_login():
                 bot.sexmax_video_download()
             else:

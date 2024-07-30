@@ -990,7 +990,6 @@ class scrapping_bot():
 
     def vip4k_login(self):
         # self.CloseDriver()
-        self.get_driver()
         # self.driver = Driver(uc=True, headless=headless)
         for i in range(3):
             self.driver.get('https://www.nowsecure.nl')
@@ -2004,7 +2003,7 @@ class scrapping_bot():
         self.whorny_category_path = self.create_or_check_path('whorny_category_videos')
 
         # Login process
-        self.get_driver()
+        # self.get_driver()
         for i in range(2):
             self.driver.get('https://whornyfilms.com/MembersPage/login')
             self.load_cookies(self.whorny.website_name)
@@ -2485,7 +2484,7 @@ class scrapping_bot():
         self.sexmex = configuration.objects.get(website_name='sexmex')
         self.sexmex_category_path = self.create_or_check_path('sexmex_category_videos')
 
-        self.get_driver()
+        # self.get_driver()
         self.driver.get('https://members.sexmex.xxx/members/')
 
         self.load_cookies(self.sexmex.website_name)

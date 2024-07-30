@@ -14,6 +14,10 @@ class Command(BaseCommand):
         for _ in range(1):
             try:
                 bot = scrapping_bot(brazzers_bot=False)
+                driver = bot.starting_bots()
+                if not driver:
+                    SendAnEmail('Could not open up the driver')
+                    return
                 print('Vip 4k process')
                 if bot.vip4k_login():
                     logggg = True
