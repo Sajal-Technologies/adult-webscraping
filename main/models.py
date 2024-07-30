@@ -16,6 +16,8 @@ class videos_collection(models.Model):
     Discription = models.TextField(null=True,blank=True)
     Pornstarts = models.CharField(max_length=500,null=True,blank=True)
     Category = models.CharField(max_length=500,null=True,blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+
     def __str__(self) -> str:
         video_title = ""
         video_name_li = self.Video_name.split('_')
