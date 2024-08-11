@@ -1,7 +1,7 @@
 export CURRENT_DIR=`dirname $(readlink -f $0)`
 export PRJ_DIR=`dirname $CURRENT_DIR`
 cd $PRJ_DIR
-
+cd /home/sajal/adult-webscraping
 killall -9 python qemu-system-x86_64
 . env/bin/activate
 

@@ -1,6 +1,6 @@
 # https://www.google.com/recaptcha/api2/demo
 from django.core.management.base import BaseCommand, CommandError
-from main.models import configuration as conf
+from main.models import configuration as conf, videos_collection
 from scrapping.settings import BASE_DIR
 from mail import SendAnEmail
 from bot import scrapping_bot
@@ -12,6 +12,6 @@ class Command(BaseCommand):
 
 
     def handle(self, *args, **options):
-        bot = scrapping_bot()
-
-        bot.test_captcha()
+        breakpoint()
+        obj = videos_collection.objects.all().first()
+        obj.video.url

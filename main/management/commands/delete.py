@@ -9,15 +9,15 @@ from datetime import datetime, timedelta, tzinfo, timezone
 from main.models import videos_collection
 
 all_Videos = []
-bas_csv_path = '/home/sajal/adult-webscraping/csv'
-files = os.listdir('/home/sajal/adult-webscraping/csv')
+bas_csv_path = os.path.join(os.getcwd(),'csv')
+files = os.listdir(bas_csv_path)
 
 base_name_dict = defaultdict(list)
 for file in files:
     base_name = file.split('_')[0]
     base_name_dict[base_name].append(file)
 
-for foldername, subfolders, filenames in os.walk(os.path.join(os.getcwd(), 'downloads')):
+for foldername, subfolders, filenames in os.walk(os.path.join(os.getcwd(), 'media')):
     all_Videos.append(os.path.join(foldername, filenames[0]) if len(filenames) > 0 else None)
 
 all_Videos = [i for i in all_Videos if i]
@@ -44,6 +44,7 @@ class Command(BaseCommand):
             videos_to_delete = [video for video, name in zip(all_videos, all_video_names) if name not in keep_videos]
             return videos_to_delete
 
+        breakpoint()
         self.main_video_li = get_videos_to_delete(self.all_not_need_dele_videos, all_Videos)
 
         for m_video in self.main_video_li:
@@ -109,7 +110,7 @@ class Command(BaseCommand):
     def create_dict_videos_from_db(self):
         all_videos_collection = videos_collection.objects.all()
         for vid in all_videos_collection:
-            if not self.is_more_than_last_two_days_datetime(vid.created, 2):
+            if not self.is_more_than_last_two_days_datetime(vid.created_at, 2):
                 self.all_not_need_dele_videos.append(vid.Video_name)
             else:
                 vid.delete()

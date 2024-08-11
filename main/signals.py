@@ -12,9 +12,13 @@ from collections import defaultdict
 import pytz 
 from .models import videos_collection, configuration
 from mail import SendAnEmail
+from django.core.management import call_command
+
 
 @receiver(user_logged_in)
 def user_logged_in_callback(sender, request, user, **kwargs):
+    call_command('delete')
+
     try:
         base_name_dict = defaultdict(list)
         for foldername, subfolders, filenames in os.walk(os.path.join(os.getcwd(), 'downloads')):

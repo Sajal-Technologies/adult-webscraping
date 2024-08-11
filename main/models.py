@@ -1,7 +1,7 @@
 from email.policy import default
 from enum import unique
 from django.db import models
-
+import os
 # Create your models here.
 
 
@@ -9,6 +9,8 @@ class videos_collection(models.Model):
     Video_name = models.CharField(max_length=255,null=True, blank=True)
     Release_Date = models.DateTimeField(null=True,blank=True)
     Poster_Image_uri = models.URLField(null=True,blank=True)
+    Poster_Image = models.FileField(upload_to='poster_imgs',default=os.path.join('cover_imgs', "csvvc.jpg"))
+    video = models.FileField(upload_to='videos',default=os.path.join('cover_imgs', "csvvc.jpg"))
     Likes = models.IntegerField(null=True,blank=True)
     Disclike = models.IntegerField(null=True,blank=True)
     Url = models.TextField(null=True,blank=True)
@@ -16,7 +18,7 @@ class videos_collection(models.Model):
     Discription = models.TextField(null=True,blank=True)
     Pornstarts = models.CharField(max_length=500,null=True,blank=True)
     Category = models.CharField(max_length=500,null=True,blank=True)
-    created = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
         video_title = ""
