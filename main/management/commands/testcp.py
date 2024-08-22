@@ -12,6 +12,5 @@ class Command(BaseCommand):
 
 
     def handle(self, *args, **options):
-        breakpoint()
         obj = videos_collection.objects.all().first()
         obj.video.url

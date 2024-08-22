@@ -1,3 +1,4 @@
+from operator import index
 from selenium.common.exceptions import NoSuchElementException, TimeoutException,ElementNotInteractableException,NoSuchElementException,WebDriverException, StaleElementReferenceException
 from utils import list_files_in_folder, check_csv_with_columns, add_data_in_csv, move_downloading_video_to_destination_after_download
 from selenium.webdriver.support import expected_conditions as EC
@@ -250,6 +251,7 @@ class scrapping_bot():
                     self.driver.execute_cdp_cmd("Page.setDownloadBehavior", params)
                     break
                 except Exception as e:
+                    
                     print(e)
         else:
             import undetected_chromedriver as uc
@@ -2049,6 +2051,7 @@ class scrapping_bot():
         collection_path = self.create_or_check_path(self.whorny_category_path, sub_folder_=collection_name)
         while videos_urls < max_video:
             self.driver.get('https://members.whornyfilms.com/search-and-filter/')
+            breakpoint()
             container = self.find_element('container', '//*[@class="dce-posts-wrapper dce-wrapper-grid"]')
             all_link = [a.get_attribute('href') for a in container.find_elements(By.TAG_NAME, 'a')]
 
@@ -2621,49 +2624,102 @@ class scrapping_bot():
         return False
 
     def fivekteen_login(self):
+        def download_image(image_url, save_path):
+            """Download an image from a URL and save it to a local file."""
+            try:
+                # Send a GET request to the image URL
+                response = requests.get(image_url)
+                
+                # Check if the request was successful
+                if response.status_code == 200:
+                    # Open the file in binary write mode and write the content
+                    with open(save_path, 'wb') as file:
+                        file.write(response.content)
+                    print(f"Image successfully downloaded and saved to {save_path}")
+                else:
+                    print(f"Failed to retrieve the image. Status code: {response.status_code}")
+            except Exception as e:
+                print(f"An error occurred: {e}")
+                
         clientKey = "6e00098870d05c550b921b362c2abde8"
+        url = "https://members.5kporn.com/login"
+        API_KEY = '6e00098870d05c550b921b362c2abde8'
+        solver = TwoCaptcha(API_KEY)
+        
+        def most_frequent_number(numbers):
+            from collections import Counter
 
-        def get_site_key():
-            site_key_ele = self.find_element('SITE-KEY', 'g-recaptcha', By.CLASS_NAME)
-            if site_key_ele:
-                site_key = site_key_ele.get_attribute('data-sitekey')
-        def create_2captcha_task(websiteKey,websiteURL="https://members.5kporn.com/login"):
+            """Find the most frequent number in a list."""
+            if not numbers:
+                raise ValueError("The list is empty.")
+            
+            # Count occurrences of each number
+            counts = Counter(numbers)
+            
+            # Find the number with the highest count
+            most_common = counts.most_common(1)[0]  # Get the most common number and its count
+            return most_common[0]
+        
+        def solve_captcha():
+            
+            def get_most_frequent_link(image_urls):
+                from collections import Counter
+                
+                """Get the most frequent image link from the web elements."""
+                # Extract image URLs from the web elements
+                
+                if not image_urls:
+                    raise ValueError("No image URLs found.")
+                
+                # Count occurrences of each URL
+                url_counts = Counter(image_urls)
+                
+                # Find the most common URL
+                most_common_url = url_counts.most_common(1)[0][0]
+                return most_common_url
+            
+            loop_run = True
+            while loop_run :
+                
+                self.driver.switch_to.default_content()
+                iframe = self.find_element('captcha iframe','//*[@title="recaptcha challenge expires in two minutes"]')
+                self.driver.switch_to.frame(iframe)
+                descriptions = self.find_element('Captcha description','//*[@id="rc-imageselect"]/div[2]/div[1]/div[1]')
+                captcha_img_src = get_most_frequent_link([ i.find_element(By.TAG_NAME,'img').get_attribute('src') for i in self.driver.find_elements(By.TAG_NAME,'td')])
+                download_image(captcha_img_src,"/media/rk/600/workspace/sajal/adult-webscraping/downloads/payload.jpeg")
+                
+                all_td = self.driver.find_elements(By.TAG_NAME,'td')
+                if len(all_td) == 9:
+                    row= 3
+                    col = 3
+                else :
+                    row = 4
+                    col = 4
+                result = solver.grid(file="/media/rk/600/workspace/sajal/adult-webscraping/downloads/payload.jpeg",hintText = descriptions.text, rows=row, cols=col)
+                    
+                if 'code' in result.keys():
+                    code_number_list = [int(i) for i in result['code'].replace('click:','').split('/') if i.isdigit()]
+                    
+                    for td in all_td :
+                        if all_td.index(td)+1 in code_number_list :
+                            td.click()
+                                
+                
+                self.click_element('captcha verify btn','recaptcha-verify-button',By.ID)
+                self.random_sleep()
+                if self.find_element('captcha verify btn','recaptcha-verify-button',By.ID) : continue
+                
+                
 
-            url = "https://api.2captcha.com/createTask"
-
-            payload = json.dumps({
-                "clientKey": clientKey,
-                "task": {
-                    "type": "RecaptchaV2TaskProxyless",
-                    "websiteURL": websiteURL,
-                    "websiteKey": websiteKey
-                }
-            })
-            headers = {
-                'Content-Type': 'application/json'
-            }
-
-            response = requests.request("POST", url, headers=headers, data=payload)
-            return json.loads(response.text)
-
-        def get_2captcha_task_result(taskId):
-            url = "https://api.2captcha.com/getTaskResult"
-
-            for _ in range(10):
-
-                payload = json.dumps({
-                    "clientKey": clientKey,
-                    "taskId": taskId
-                })
-                headers = {
-                    'Content-Type': 'application/json'
-                }
-
-                response = requests.request("POST", url, headers=headers, data=payload)
-                response = json.loads(response.text)
-                if response['status'] == "ready" :
-                    return response
-
+                self.driver.switch_to.default_content()
+                sub_btn = self.find_element('login btn', '//*[@type="submit"]', timeout=2)
+                if sub_btn :
+                    sub_btn.submit()
+                
+                self.random_sleep(5,10)
+                if self.find_element('Sign Out', "//button[contains(normalize-space(.), 'Logout')]"):
+                    self.get_cookies(self.fivekteen.website_name)
+                break
 
 
         self.fivekteen = configuration.objects.get(website_name='5kteen')
@@ -2676,7 +2732,6 @@ class scrapping_bot():
 
             self.driver.get('https://members.5kporn.com/')
             self.load_cookies(self.fivekteen.website_name, 'https://members.5kporn.com/')
-            breakpoint()
             self.random_sleep()
 
             if self.find_element('Sign Out', "//button[contains(normalize-space(.), 'Logout')]"):
@@ -2691,16 +2746,10 @@ class scrapping_bot():
 
             self.input_text(self.fivekteen.username, 'username_input', '//*[@id="username"]')
             self.input_text(self.fivekteen.password, 'password_input', '//*[@id="password"]')
-            url = "https://members.5kporn.com/login"
-            API_KEY = '6e00098870d05c550b921b362c2abde8'
-            solver = TwoCaptcha(API_KEY)
-            site_key_ele = self.find_element('SITE-KEY', 'g-recaptcha', By.CLASS_NAME)
-            site_key = site_key_ele.get_attribute('data-sitekey')
-            result = solver.recaptcha(sitekey=site_key, url=url)
-            recaptcha_response = result['code']
-            self.driver.execute_script('document.getElementById("g-recaptcha-response").innerHTML = arguments[0]',recaptcha_response)
             sub_btn = self.find_element('login btn', '//*[@type="submit"]')
             sub_btn.submit()
+            solve_captcha()
+            
             self.random_sleep()
             if self.find_element('Sign Out', "//button[contains(normalize-space(.), 'Logout')]"):
                 self.get_cookies(self.fivekteen.website_name)
@@ -2758,6 +2807,7 @@ class scrapping_bot():
             if download_table:
                 self.click_element('Best quality download video','//*[@id="collapseEPS"]/div/ul/li')
             name_of_file = tmp['Video-name']
+            
             file_name = self.wait_for_file_download()
 
             if not os.path.exists(os.path.join(self.download_path,'fivekteen_category_videos','teen')):

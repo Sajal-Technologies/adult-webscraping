@@ -44,7 +44,6 @@ class Command(BaseCommand):
             videos_to_delete = [video for video, name in zip(all_videos, all_video_names) if name not in keep_videos]
             return videos_to_delete
 
-        breakpoint()
         self.main_video_li = get_videos_to_delete(self.all_not_need_dele_videos, all_Videos)
 
         for m_video in self.main_video_li:
