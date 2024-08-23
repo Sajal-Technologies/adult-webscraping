@@ -754,7 +754,7 @@ class scrapping_bot():
 
         found_max_videos = self.brazzers.numbers_of_download_videos
         self.random_sleep(6,10)
-        collection_name = (f'{self.brazzers.category}_videos' if not collection else f'brazzers_{collection}').replace('brazzers_brazzers','brazzers')
+        collection_name = (f'brazzers_{self.brazzers.category}_videos' if not collection else f'brazzers_{collection}').replace('brazzers_brazzers','brazzers')
         video_detailes['collection_name'] = collection_name        
         if collection:self.make_csv(collection_name,new=True) 
         csv_name = collection_name if collection else self.brazzers.website_name
@@ -806,7 +806,7 @@ class scrapping_bot():
         else: 
             collection_path = self.create_or_check_path(self.brazzers_category_path)
             # sub_folder = None
-
+        breakpoint()
         for idx, video_url in enumerate(videos_urls):
             self.driver.get(video_url['video_url'])
             self.random_sleep(10,15)
