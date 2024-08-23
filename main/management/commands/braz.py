@@ -25,11 +25,11 @@ class Command(BaseCommand):
                     video_dict = bot.get_brazzers_videos_url()
                     bot.download_brazzer_videos(video_dict)
                     tags_102 = bot.get_brazzers_videos_url(url='https://site-ma.brazzers.com/scenes?addon=102')
-                    bot.download_videos(tags_102, 'addon_102')  # mofos
+                    bot.download_brazzer_videos(tags_102, 'addon_102')  # mofos
                     tags_152 = bot.get_brazzers_videos_url(url='https://site-ma.brazzers.com/scenes?addon=152')
-                    bot.download_videos(tags_152, 'addon_152')  # reality kings
+                    bot.download_brazzer_videos(tags_152, 'addon_152')  # reality kings
                     tags_162 = bot.get_brazzers_videos_url(url='https://site-ma.brazzers.com/scenes?addon=162')
-                    bot.download_videos(tags_162, 'addon_162')  # brazzers_main
+                    bot.download_brazzer_videos(tags_162, 'addon_162')  # brazzers_main
 
                     # bot.brazzers_download_video(video_dict)  # don't uncomment this line 
 
