@@ -155,8 +155,7 @@ class scrapping_bot():
             for arg in self.extra_args:
                 self.options.add_argument(arg)
     
-    def get_driver(self,):
-        headless = False
+    def get_driver(self):
         if not headless:
             self.get_local_driver()
             return
