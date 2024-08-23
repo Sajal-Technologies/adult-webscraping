@@ -639,6 +639,9 @@ class scrapping_bot():
             website_name = 'brazzers_'+ 'brazzers_main'
         website_video_csv_path = os.path.join(self.csv_path,f'{website_name}_videos.csv')
         website_video_details_csv_path = os.path.join(self.csv_path,f'{website_name}_videos_details.csv')
+        
+        if not os.path.exists(website_video_csv_path) :
+            self.make_csv(website_video_csv_path,new=True)
         videos_collection = pd.read_csv(website_video_details_csv_path)
         videos_collection = videos_collection.to_dict(orient='records')
         videos_data = pd.read_csv(website_video_csv_path)
@@ -652,6 +655,7 @@ class scrapping_bot():
         videos_urls = videos_dict['video_list']
         collection_name = videos_dict['collection_name']
         collection_path = self.create_or_check_path(self.brazzers_category_path,sub_folder_=collection_name)
+        breakpoint()
         for idx,videoss_urll in enumerate(videos_urls) :
             self.driver.get(videoss_urll['video_url'])
             self.random_sleep(10,15)
