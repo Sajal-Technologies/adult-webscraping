@@ -710,6 +710,7 @@ class scrapping_bot():
                 self.click_element('download high_quality','//div[@class="sc-yox8zw-0 cQnfGv"]/ul/div/button[1]')
                 file_name = self.wait_for_file_download()
                 self.random_sleep(3,5)
+                breakpoint()
                 name_of_file = os.path.join(self.download_path, f'{video_name}.mp4')
                 os.rename(os.path.join(self.download_path,file_name), name_of_file)
                 self.random_sleep(2,4)
