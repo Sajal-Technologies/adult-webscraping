@@ -629,6 +629,7 @@ class scrapping_bot():
         return video_detailes
 
     def set_data_of_csv(self,website_name :str, tmp :dict,video_name : str):
+        breakpoint()
         if '_videos' in website_name:website_name =website_name.replace('_videos','')
         if 'addon_102' in website_name :
             website_name = 'brazzers_'+ 'mofos'
