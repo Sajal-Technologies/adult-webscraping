@@ -23,6 +23,7 @@ photos/*
 */migrations
 /*/__pycache__
 downloads copy
+
 /*/management/commands/test.py
 *.log
 *.csv
@@ -33,3 +34,4 @@ downloaded_files
 config.json
 extensions
 cookies
+media/*
