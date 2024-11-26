@@ -1,0 +1,37 @@
+env
+env2
+chrome_profile/*
+profiles/*
+chromeprofile/*
+profiles
+# z.py
+__pycache__
+videos/*
+etc
+downloads/*
+db.sqlite3
+.vscode
+chrome
+photos/*
+*.sqlite3
+**/__pycache__/**
+*.pyc
+/*/migrations/*
+**/migrations/**
+!**/migrations
+!**/migrations/__init__.py
+*/migrations
+/*/__pycache__
+downloads copy
+
+/*/management/commands/test.py
+*.log
+*.csv
+csv
+static/
+*.png
+downloaded_files
+config.json
+extensions
+cookies
+media/*

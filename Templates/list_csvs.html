@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CSV Downloads</title>
+</head>
+<body>
+    <h1>Configuration CSV Downloads</h1>
+    <ul>
+        {% for item in data %}
+        <li>
+            <strong>{{ item.config.website_name }}</strong> - 
+            <a href="{{ item.download_link }}">Download CSV</a>
+        </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
