@@ -1,0 +1,14 @@
+
+command : ps aux | grep gunicorn
+result : 
+sajal     350727  0.0  0.2  32228 22252 ?        S    Nov22   0:06 /home/sajal/Morten-Adult-videos/env/bin/python -m gunicorn Scrape.wsgi:application --bind 0.0.0.0:8000
+sajal     392855  0.0  1.0 274220 83360 ?        Sl   20:05   0:00 /home/sajal/Morten-Adult-videos/env/bin/python -m gunicorn Scrape.wsgi:application --bind 0.0.0.0:8000
+sajal     394166  0.0  0.0   7008  2164 pts/10   S+   20:17   0:00 grep --color=auto gunicorn
+
+command :
+kill 350727
+kill 392855
+kill 394166
+
+restart gunicorn :
+/home/sajal/Morten-Adult-videos/env/bin/python -m gunicorn Scrape.wsgi:application --bind 0.0.0.0:8000
