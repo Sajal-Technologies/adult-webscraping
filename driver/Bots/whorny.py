@@ -120,19 +120,6 @@ class Bot(StartDriver):
                                 }
                                 
 
-                                response = requests.request("GET", post_url, headers=headers, data=payload)
-                                with open(os.path.join(collection_path, f'{video_name}.jpg'), 'wb') as file:
-                                    file.write(response.content)
-                                
-                                self.click_element('download button', '//*[@data-id="dd55478"]')
-                                url = self.find_element('download button', '//*[@data-id="1a4b7e6"]').find_element(By.TAG_NAME, 'a').get_attribute('href')
-                                headers = {
-                                    'Referer': 'https://downloads.whornyfilms.com/', 
-                                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',                                'Accept-Encoding': 'gzip, deflate, br, zstd',                               
-                                    'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
-                                    }
-                                self.download_video_from_request(url, os.path.join(collection_path, f'{video_name}.mp4'), headers)
-                                
                                 media_path = os.path.join(os.getcwd(),'media')
                                 video_media_path = os.path.join(media_path,'videos','Whorny_category_videos',"collection_name")
                                 image_media_path = os.path.join(media_path,'image','Whorny_category_videos',"collection_name")
@@ -157,8 +144,8 @@ class Bot(StartDriver):
                                 self.download_video_from_request(url, final_video_media_path, headers)
                                 
                                 
-                                object_video_file = os.path.join('videos','sexmex_category_videos',self.sexmax.main_category,f'{video_name}.mp4')
-                                object_image_file = os.path.join('image','sexmex_category_videos',self.sexmax.main_category,f'{video_name}.jpg')
+                                object_video_file = os.path.join('videos','sexmex_category_videos',self.sexmex.main_category,f'{video_name}.mp4')
+                                object_image_file = os.path.join('image','sexmex_category_videos',self.sexmex.main_category,f'{video_name}.jpg')
                                 print("Image file : ",object_image_file)
                                 print("Video file : ",object_video_file)
                                 
@@ -178,8 +165,8 @@ class Bot(StartDriver):
                                         Pornstarts = tmp["Pornstarts"],
                                         configuration = self.sexmex
                                     )
-                                    if self.sexmax.main_category :
-                                        cetegory_obj, _ = cetegory.objects.get_or_create(category = self.sexmax.main_category)
+                                    if self.sexmex.main_category :
+                                        cetegory_obj, _ = cetegory.objects.get_or_create(category = self.sexmex.main_category)
                                         videos_data_obj.cetegory = cetegory_obj
                                         videos_data_obj.save()
                                     
@@ -189,9 +176,7 @@ class Bot(StartDriver):
                                         videos_data_obj.save()
                                     else :
                                         videos_data_obj.delete()
-
-                                    print(f'video download count: {videos_urls+1}')
-                                    videos_urls+=1
+                                videos_urls+=1
                             except:
                                 continue
             # Go to the next page if available

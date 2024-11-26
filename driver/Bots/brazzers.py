@@ -277,7 +277,6 @@ class Bot(StartDriver):
                     Discription = tmp['Discription'],
                     Release_Date = tmp["Release-Date"],
                     Poster_Image_url = tmp["Poster-Image_uri"],
-                    video_download_url = tmp["poster_download_uri"],
                     Video_name = tmp["Video-name"],
                     Photo_name = tmp["Photo-name"],
                     Pornstarts = tmp["Pornstarts"],

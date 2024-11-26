@@ -204,6 +204,8 @@ class Bot(StartDriver):
                     "Pornstarts" : '',
                     "Username" : self.adultprime.website_name,
                 }
+            created_records = []
+
             try:
                 likes_count = self.find_element('Likes count','//span[@class="up-down-votes"]')
                 if likes_count :
@@ -236,14 +238,15 @@ class Bot(StartDriver):
                 tmp['Photo-name'] = f'{video_name}.jpg'
                 tmp['Video-name'] = f'{video_name}.mp4'
 
-                v_url = f'http://208.122.217.49:8000{collection_path.replace(self.base_path,"")}/{video_name}.mp4'.replace('\\', '/')
-                p_url = f'http://208.122.217.49:8000{collection_path.replace(self.base_path,"")}/{video_name}.jpg'.replace('\\', '/')
+                
+                v_url = f'http://208.122.217.49:8000/API{collection_path.replace(self.base_path,"")}/{video_name}.mp4'.replace('\\', '/')
+                p_url = f'http://208.122.217.49:8000/API{collection_path.replace(self.base_path,"")}/{video_name}.jpg'.replace('\\', '/')
+                # http://208.122.217.49:8000/downloads/Adultprime_category_videos/adultprime__adara_jordin_takes_control.mp4
+                # http://208.122.217.49:8000/API/media/download/videos/handjob_category_videos/strictlyhands/Handjob_strictlyhands_toned_jenny_lee_is_the_biggest_tease_ever.mp4/
                 tmp['poster_download_uri'] = p_url  
                 tmp['video_download_url'] = v_url
 
-                response = requests.get(video_url['post_url'])
-                with open(os.path.join(collection_path, f'{video_name}.jpg'), 'wb') as f:f.write(response.content)
- 
+                
                 local_filename =  os.path.join(collection_path, f'{video_name}.mp4')
                 
                 self.click_element('download drop menu','//*[@id="theatre-row"]/div[1]/div[2]/div/div[2]/div/div[1]/button')
@@ -251,51 +254,70 @@ class Bot(StartDriver):
                 DownloadQualityMenu = self.driver.find_element(By.XPATH, '//ul[@class="dropdown-menu btn-block"]')
                 FullHD_link = DownloadQualityMenu.find_elements(By.TAG_NAME,'li')
                 
-                videos_data_obj = VideosData.objects.create(
-                    Username = self.adultprime.username,
-                    Likes = tmp['Likes'],
-                    Disclike = tmp['Disclike'],
-                    Url = tmp['Url'],
-                    Title = tmp["Title"],
-                    Discription = tmp["Discription"],
-                    Release_Date = tmp["Release-Date"],
-                    Poster_Image_url = tmp["Poster-Image_uri"],
-                    video_download_url = tmp["poster_download_uri"],
-                    Video_name = tmp["Video-name"],
-                    Photo_name = tmp["Photo-name"],
-                    Pornstarts = tmp["Pornstarts"],
-                    configuration = self.adultprime
-                )
-                if self.category :
-                    cetegory_obj, _ = cetegory.objects.get_or_create(category = self.category)
-                    videos_data_obj.cetegory = cetegory_obj
-                    videos_data_obj.save()
                 
+                
+                media_path = os.path.join(os.getcwd(),'media')
+                video_media_path = os.path.join(media_path,'videos','Adultprime_category_videos',self.category.category)
+                image_media_path = os.path.join(media_path,'image','Adultprime_category_videos',self.category.category)
+                
+                os.makedirs(video_media_path, exist_ok=True)
+                os.makedirs(image_media_path, exist_ok=True)
+                
+                final_image_media_path = os.path.join(image_media_path, f'{video_name}.jpg')
+                response = requests.get(videos_dict['video_list'][0]['post_url'])
+                with open(final_image_media_path, 'wb') as f:
+                    f.write(response.content)
+ 
                 if len(FullHD_link) > 2:
+                    
+                    download_dir = "downloads"
+                    files = []
+                    for f in os.listdir(download_dir) :  
+                        if os.path.isfile(os.path.join(download_dir, f)) :
+                            files.append(f)
+                            
                     decoded_url = FullHD_link[2].find_element(By.TAG_NAME,'a')
                     decoded_url.click()
                     self.random_sleep(2,3)
                     
-                    # video_url = self.find_element('video url', '//*[text()="1080p"]').get_attribute('value')
-                    # self.download_video_from_request(video_url, os.path.join(self.sexmex_category_path, f'{video_name}.mp4'))
-
-                    video_file = f'{self.adultprime_category_path}/{video_name}.mp4'
-                    if os.path.exists(video_file) :
-                        video_file = self.copy_files_in_media_folder(video_file)
-                        if video_file :
-                            videos_data_obj.video = video_file
-                            
+                    self.driver.save_screenshot('driver.png')
+                    file_name = self.wait_for_file_download(files)
+                    if not file_name :
+                        print(f"Adultprime video has been failed to download\nDownload Failed URL : {tmp['Url']}")
+                        SendAnEmail(f"Adultprime video has been failed to download\nDownload Failed URL : {tmp['Url']}")
+                        continue
                         
-                    image_file = f'{self.adultprime_category_path}/{video_name}.jpg'
-                    if os.path.exists(image_file) :
-                        image_file = self.copy_files_in_media_folder(image_file,folder="image")
-                        if image_file :
-                            videos_data_obj.image = image_file
+                    final_video_media_path = os.path.join(video_media_path,tmp["Video-name"])
+                    os.rename(os.path.join(self.download_path,file_name), final_video_media_path)
+                    self.random_sleep(3,5)
                     
-                    videos_data_obj.save()
-                    # self.download_video_from_request(decoded_url, local_filename)
-                else:continue
-
+                    exists_media_image_path = os.path.join('image','Adultprime_category_videos',self.category.category,f'{tmp["Video-name"]}'.replace('.mp4','.jpg'))
+                    exists_media_videos_path = os.path.join('videos','Adultprime_category_videos',self.category.category,f'{tmp["Video-name"]}')
+                    print("Image file : ",exists_media_image_path)
+                    print("Video file : ",exists_media_videos_path)
+                    
+                    if os.path.exists(final_video_media_path) and os.path.exists(final_image_media_path) :
+                    
+                        videos_data_obj = VideosData.objects.create(
+                            video = exists_media_videos_path,
+                            image = exists_media_image_path,
+                            Username = self.adultprime.username,
+                            Likes = tmp['Likes'],
+                            Disclike = tmp['Disclike'],
+                            Url = tmp['Url'],
+                            Title = tmp["Title"],
+                            Discription = tmp["Discription"],
+                            Release_Date = tmp["Release-Date"],
+                            Poster_Image_url = tmp["Poster-Image_uri"],
+                            Video_name = tmp["Video-name"],
+                            Photo_name = tmp["Photo-name"],
+                            Pornstarts = tmp["Pornstarts"],
+                            configuration = self.adultprime,
+                            cetegory = self.category
+                        )
+                else:
+                    SendAnEmail(f"Adultprime video has been failed to download\nDownload Failed URL : {tmp['Url']}")
                 
             except Exception as e:
                 print('Error:', e)
+                SendAnEmail(f"Adultprime video has been failed to download\nError : {e}\nDownload Failed URL : {tmp['Url']}")

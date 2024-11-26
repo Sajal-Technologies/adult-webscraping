@@ -1,5 +1,8 @@
 from django.db import models
 import os
+from datetime import timedelta
+from django.utils.timezone import now
+from django.conf import settings
 
 # Create your models here.
 class videos_collection(models.Model):
@@ -56,8 +59,8 @@ class sender_mail(models.Model):
     
 class VideosData(models.Model):
     
-    video = models.FileField(upload_to='videos',null=True,blank=True)
-    image = models.FileField(upload_to='image',null=True,blank=True)
+    video = models.FileField(upload_to='videos')
+    image = models.FileField(upload_to='image')
     Username = models.CharField(max_length=255,null=True,blank=True)
     Likes = models.IntegerField(null=True,blank=True)
     Disclike = models.IntegerField(null=True,blank=True)
@@ -66,9 +69,85 @@ class VideosData(models.Model):
     Discription = models.TextField(null=True,blank=True)
     Release_Date = models.CharField(max_length=255,null=True,blank=True)
     Poster_Image_url = models.URLField(null=True,blank=True)
-    Video_name = models.CharField(max_length=255,null=True,blank=True)
-    video_download_url = models.URLField(null=True,blank=True)
-    Photo_name = models.CharField(max_length=255,null=True,blank=True)
+    Video_name = models.CharField(max_length=255,null=True,blank=True,unique=True)
+    Photo_name = models.CharField(max_length=255,null=True,blank=True,unique=True)
     Pornstarts = models.TextField(null=True,blank=True)
     configuration = models.ForeignKey(configuration, on_delete=models.CASCADE, related_name='configuration',null=True,blank=True)
     cetegory = models.ForeignKey(cetegory, on_delete=models.CASCADE, related_name='cetegory',null=True,blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    deleted_or_not = models.BooleanField(default=False)
+    
+    @classmethod
+    def delete_older_videos(cls):
+        """
+        Deletes records older than the specified number of days along with their video and image files.
+
+        Parameters:
+            days (int): Number of days to check for old records.
+        """
+        # Delete files for records older than the cutoff
+        old_records = cls.objects.filter(deleted_or_not = False)
+        for record in old_records:
+            
+            # Get the `delete_old_days` value from the configuration
+            days = record.configuration.delete_old_days if record.configuration else 0
+            cutoff_date = now() - timedelta(days=days)
+
+            # Check if the record is older than the cutoff date
+            if record.created_at < cutoff_date:
+                # Delete associated video file
+                if record.video and os.path.exists(record.video.path):
+                    os.remove(record.video.path)
+                    print(f"Deleted video file: {record.video.path}")
+
+                # Delete associated image file
+                if record.image and os.path.exists(record.image.path):
+                    os.remove(record.image.path)
+                    print(f"Deleted image file: {record.image.path}")
+
+                # Delete the record
+                record.deleted_or_not = True
+                record.save()
+                print(f"Deleted record: {record.id}")
+
+        # Get all valid file paths in the database
+        valid_files = set()
+        for record in cls.objects.all():
+            if record.video:
+                valid_files.add(record.video.path)
+            if record.image:
+                valid_files.add(record.image.path)
+
+        # Delete orphaned files in the media folder
+        media_root = settings.MEDIA_ROOT
+        for root, _, files in os.walk(media_root):
+            for file in files:
+                file_path = os.path.join(root, file)
+                if file_path not in valid_files:
+                    try:
+                        os.remove(file_path)
+                        print(f"Deleted orphaned file: {file_path}")
+                    except Exception as e:
+                        print(f"Error deleting file {file_path}: {e}")
+        
+        
+        # old_records = cls.objects.all()
+        # for record in old_records: 
+        #     days = record.configuration.delete_old_days
+        #     cutoff_date = now() - timedelta(days=days)
+            
+        #     if record.created_at < cutoff_date :
+            
+        #         # Delete associated video file
+        #         if record.video and os.path.exists(record.video.path):
+        #             os.remove(record.video.path)
+        #             print(f"Deleted video file: {record.video.path}")
+
+        #         # Delete associated image file
+        #         if record.image and os.path.exists(record.image.path):
+        #             os.remove(record.image.path)
+        #             print(f"Deleted image file: {record.image.path}")
+
+        #         # Delete the record
+        #         record.delete()
+        #         print(f"Deleted record: {record.id}")

@@ -128,11 +128,15 @@ class Bot(StartDriver):
             
             os.makedirs(video_media_path,exist_ok=True)
             os.makedirs(image_media_path,exist_ok=True)
+            
+            final_video_media_path = os.path.join(video_media_path, f'{video_name}.mp4')
+            final_image_media_path = os.path.join(image_media_path, f'{video_name}.jpg')
+            
             VideoDdownloaded = False
-            try :VideoDdownloaded = urllib.request.urlretrieve(video_link,os.path.join(video_media_path, f'{video_name}.mp4'))
+            try :VideoDdownloaded = urllib.request.urlretrieve(video_link,final_video_media_path)
             except Exception as e : print('Error : Videos downloading in handjob :',e)
             
-            try :ImgDownloaded = urllib.request.urlretrieve(img_src, os.path.join(image_media_path, f'{video_name}.jpg'))
+            try :ImgDownloaded = urllib.request.urlretrieve(img_src, final_image_media_path)
             except Exception as e : print('Error : image downloading in handjob :',e)
             if not VideoDdownloaded or not ImgDownloaded : 
                 print('error : Video or Image could not download in hand job')
@@ -143,11 +147,6 @@ class Bot(StartDriver):
             if model_name_ele :
                 model_name = model_name_ele.text.replace('Model:','').strip()
             else : model_name
-
-            self.base_path
-            
-            v_url = f'http://208.122.217.49:8000/API{collection_path.replace(self.base_path,"")}/{video_name}.mp4'
-            p_url = f'http://208.122.217.49:8000/API{collection_path.replace(self.base_path,"")}/{video_name}.jpg'
             
             discription = ''
             All_Ptag = self.driver.find_elements(By.TAG_NAME,'p')
@@ -155,38 +154,33 @@ class Bot(StartDriver):
                 PtagText = Ptag.text.strip()
                 if not PtagText or PtagText.startswith('Lenght') or PtagText.startswith('Photos') or  PtagText.startswith('Added on: '):continue
                 discription += PtagText
-                
-            tmp['Title'] = video_title
-            tmp['Discription'] = discription
-            tmp['Release-Date'] = date_string
-            tmp['Video-name'] = f'{video_name}.mp4'
-            tmp['Photo-name'] = f'{video_name}.jpg'
-            tmp['poster_download_uri'] = p_url
-            tmp['video_download_url'] = v_url
-            tmp['Pornstarts'] = model_name    
-            print("Image file : ",os.path.join('video','handjob_category_videos',self.handjob.main_category,f'{video_name}.mp4'))
-            print("Video file : ",os.path.join('image','handjob_category_videos',self.handjob.main_category,f'{video_name}.jpg'))
-            cetegory_obj, _ = cetegory.objects.get_or_create(category = self.handjob.main_category)
-            videos_data_obj = VideosData.objects.create(
-                video = os.path.join('videos','handjob_category_videos',self.handjob.main_category,f'{video_name}.mp4'),
-                image = os.path.join('image','handjob_category_videos',self.handjob.main_category,f'{video_name}.jpg'),
-                Username = self.handjob.username,
-                Likes = 0,
-                Disclike = 0,
-                Url = video_url,
-                Title = video_title,
-                Discription = discription,
-                Release_Date = date_string,
-                Poster_Image_url = img_src,
-                video_download_url = v_url,
-                Video_name = f'{video_name}.mp4',
-                Photo_name = f'{video_name}.jpg',
-                Pornstarts = model_name,
-                configuration = self.handjob,
-                cetegory = cetegory_obj
-            )
-            numbers_of_download_videos -= 1
             
+            image_object_path = os.path.join('video','handjob_category_videos',self.handjob.main_category,f'{video_name}.mp4')
+            videos_object_path = os.path.join('image','handjob_category_videos',self.handjob.main_category,f'{video_name}.jpg')
+            print("Image file : ",image_object_path)
+            print("Video file : ",videos_object_path)
+            cetegory_obj, _ = cetegory.objects.get_or_create(category = self.handjob.main_category)
+            
+            if os.path.exists(final_image_media_path) and os.path.exists(final_video_media_path) :
+                videos_data_obj = VideosData.objects.create(
+                    video = videos_object_path,
+                    image = image_object_path,
+                    Username = self.handjob.username,
+                    Likes = 0,
+                    Disclike = 0,
+                    Url = video_url,
+                    Title = video_title,
+                    Discription = discription,
+                    Release_Date = date_string,
+                    Poster_Image_url = img_src,
+                    Video_name = f'{video_name}.mp4',
+                    Photo_name = f'{video_name}.jpg',
+                    Pornstarts = model_name,
+                    configuration = self.handjob,
+                    cetegory = cetegory_obj
+                )
+                numbers_of_download_videos -= 1
+                
             if numbers_of_download_videos <= 0 :
                 break
             
@@ -195,109 +189,118 @@ class Bot(StartDriver):
         # for other catefories
         for category in self.handjob.category.all() : 
             numbers_of_download_videos = self.handjob.numbers_of_download_videos
-            print(category)
-            
-            link = f"https://handjob.tv/videos/{category.category}/"
-            self.driver.get(link)
-
-            handjob_not_used_links = []
-            hand_job_category_name = category
-            details_csv_path = self.handjob.website_name
-            self.check_csv_exist(details_csv_path)
-            
-            if self.find_element("Age verify","age-verify-overlay",By.ID):
-                self.click_element("I'm older","verify-age", By.ID)
-                
-            find_last_pag_num = 0
-            
-            last_page_ele = self.driver.find_elements(By.XPATH,'//*[@id="pagination"]/div/*')[-1]
-            if last_page_ele.find_elements(By.TAG_NAME,'a'):
-                find_last_pag_num = last_page_ele.find_elements(By.TAG_NAME,'a')[0].get_attribute('href').split('/')[-1].replace('page','')
-            
-            if not find_last_pag_num :
-                print("cound not found the find_last_pag_num for hand job other sites of category")
-                continue
             
             all_used_link = [i.Url for i in VideosData.objects.filter( configuration = self.handjob )]
-            for pages in range(int(find_last_pag_num)): 
+            print(category)
+            
+            for _ in range(3) :
+                link = f"https://handjob.tv/videos/{category.category}/"
+                self.driver.get(link)
+
+                handjob_not_used_links = []
+                hand_job_category_name = category
+                details_csv_path = self.handjob.website_name
+                self.check_csv_exist(details_csv_path)
                 
-                if pages == 0:
-                    self.driver.get(link)
-                else:
-                    self.driver.get(link+'page'+str(pages))
+                if self.find_element("Age verify","age-verify-overlay",By.ID):
+                    self.click_element("I'm older","verify-age", By.ID)
                     
-                all_videos_thumbs = self.driver.find_elements(By.CLASS_NAME,'thumb-all')
-                for i in all_videos_thumbs : 
-                    vd_link = i.find_element(By.TAG_NAME,'a').get_attribute('href')
-                    if not vd_link in all_used_link :
-                        handjob_not_used_links.append([vd_link,i.find_element(By.TAG_NAME,'img').get_attribute('src')])
+                find_last_pag_num = 0
+                
+                last_page_ele = self.driver.find_elements(By.XPATH,'//*[@id="pagination"]/div/*')[-1]
+                if last_page_ele.find_elements(By.TAG_NAME,'a'):
+                    find_last_pag_num = last_page_ele.find_elements(By.TAG_NAME,'a')[0].get_attribute('href').split('/')[-1].replace('page','')
+                
+                if not find_last_pag_num :
+                    print("cound not found the find_last_pag_num for hand job other sites of category")
+                    continue
+                
+                for pages in range(int(find_last_pag_num)): 
+                    
+                    if pages == 0:
+                        self.driver.get(link)
+                    else:
+                        self.driver.get(link+'page'+str(pages))
                         
+                    all_videos_thumbs = self.driver.find_elements(By.CLASS_NAME,'thumb-all')
+                    for i in all_videos_thumbs : 
+                        vd_link = i.find_element(By.TAG_NAME,'a').get_attribute('href')
+                        if not vd_link in all_used_link :
+                            handjob_not_used_links.append([vd_link,i.find_element(By.TAG_NAME,'img').get_attribute('src')])
+                            
+                        if len(handjob_not_used_links) > self.handjob.numbers_of_download_videos : break
                     if len(handjob_not_used_links) > self.handjob.numbers_of_download_videos : break
-                if len(handjob_not_used_links) > self.handjob.numbers_of_download_videos : break
-            
-            for vd_link in handjob_not_used_links: 
+                
+                for vd_link in handjob_not_used_links: 
 
-                self.driver.get(vd_link[0])
-                self.random_sleep(5,7)
-                
-                download_dir = "downloads"
-                files = []
-                for f in os.listdir(download_dir) : 
-                    if os.path.isfile(os.path.join(download_dir, f)) :
-                        files.append(f)
-                
-                # download btn
-                self.driver.find_elements(By.XPATH,'//*[@class="download-full-movie"]/div/*')[-2].click()
-                self.random_sleep(3,5)
+                    self.driver.get(vd_link[0])
+                    self.random_sleep(5,7)
+                    
+                    download_dir = "downloads"
+                    files = []
+                    for f in os.listdir(download_dir) : 
+                        if os.path.isfile(os.path.join(download_dir, f)) :
+                            files.append(f)
+                    
+                    # download btn
+                    self.driver.find_elements(By.XPATH,'//*[@class="download-full-movie"]/div/*')[-2].click()
+                    self.random_sleep(3,5)
 
-                file_name = self.wait_for_file_download(files)
-                video_infor = self.genrate_handjob_a_data_dict(vd_link,category)
-                name_of_file = os.path.join(self.download_path, video_infor['Video-name'])
+                    file_name = self.wait_for_file_download(files)
+                    if file_name == False :
+                        [ os.remove(os.path.join(os.getcwd(),'downloads',i)) for i in os.listdir('downloads') if i.endswith('.crdownload') or i.endswith('.mp4') ]
+                        continue
+                    
+                    video_infor = self.genrate_handjob_a_data_dict(vd_link,category)
+                    name_of_file = os.path.join(self.download_path, video_infor['Video-name'])
 
-                media_path = os.path.join(os.getcwd(),'media')
-                video_media_path = os.path.join(media_path,'videos','handjob_category_videos',category.category)
-                image_media_path = os.path.join(media_path,'image','handjob_category_videos',category.category)
-                
-                os.makedirs(video_media_path, exist_ok=True)
-                os.makedirs(image_media_path, exist_ok=True)
-                
-                final_video_media_path = os.path.join(video_media_path, video_infor['Video-name'])
-                os.rename(os.path.join(self.download_path,file_name), final_video_media_path)
-                self.random_sleep(3,5)
-                
-                final_image_media_path = os.path.join(image_media_path,video_infor["Video-name"].replace('.mp4','.jpg'))
-                response = requests.get(vd_link[1])
-                if response.status_code == 200:
-                    with open(final_image_media_path, 'wb') as file: file.write(response.content)
+                    media_path = os.path.join(os.getcwd(),'media')
+                    video_media_path = os.path.join(media_path,'videos','handjob_category_videos',category.category)
+                    image_media_path = os.path.join(media_path,'image','handjob_category_videos',category.category)
+                    
+                    os.makedirs(video_media_path, exist_ok=True)
+                    os.makedirs(image_media_path, exist_ok=True)
+                    
+                    final_video_media_path = os.path.join(video_media_path, video_infor['Video-name'])
+                    os.rename(os.path.join(self.download_path,file_name), final_video_media_path)
+                    self.random_sleep(3,5)
+                    
+                    final_image_media_path = os.path.join(image_media_path,video_infor["Video-name"].replace('.mp4','.jpg'))
+                    response = requests.get(vd_link[1])
+                    if response.status_code == 200:
+                        with open(final_image_media_path, 'wb') as file: file.write(response.content)
 
-                cetegory_obj, _ = cetegory.objects.get_or_create(category = category)
-                print("Image file : ",os.path.join('image','handjob_category_videos',category.category,f'{video_infor["Video-name"]}'.replace('.mp4','.jpg')))
-                print("Video file : ",os.path.join('videos','handjob_category_videos',category.category,f'{video_infor["Video-name"]}'))
-                videos_data_obj = VideosData.objects.create(
-                    video = os.path.join('videos','handjob_category_videos',category.category,f'{video_infor["Video-name"]}'),
-                    image = os.path.join('image','handjob_category_videos',category.category,f'{video_infor["Video-name"]}'.replace('.mp4','.jpg')),
-                    Username = self.handjob.username,
-                    Likes = 0,
-                    Disclike = 0,
-                    Url = self.driver.current_url,
-                    Title = video_infor["Title"],
-                    Discription = video_infor["Discription"],
-                    Release_Date = video_infor["Release-Date"],
-                    Poster_Image_url = video_infor["Poster-Image_uri"],
-                    video_download_url = video_infor["poster_download_uri"],
-                    Video_name = video_infor["Video-name"],
-                    Photo_name = video_infor["Photo-name"],
-                    Pornstarts = video_infor["Pornstarts"],
-                    configuration = self.handjob,
-                    cetegory = cetegory_obj
-                )
-                
-                numbers_of_download_videos -= 1
-            
+                    cetegory_obj, _ = cetegory.objects.get_or_create(category = category)
+                    videos_object_path = os.path.join('videos','handjob_category_videos',category.category,f'{video_infor["Video-name"]}')
+                    image_object_path = os.path.join('image','handjob_category_videos',category.category,f'{video_infor["Video-name"]}'.replace('.mp4','.jpg'))
+                    print("Image file : ",image_object_path)
+                    print("Video file : ",videos_object_path)
+                    
+                    if os.path.exists(final_video_media_path) and os.path.exists(final_image_media_path) :
+                        videos_data_obj = VideosData.objects.create(
+                            video = videos_object_path,
+                            image = image_object_path,
+                            Username = self.handjob.username,
+                            Likes = 0,
+                            Disclike = 0,
+                            Url = self.driver.current_url,
+                            Title = video_infor["Title"],
+                            Discription = video_infor["Discription"],
+                            Release_Date = video_infor["Release-Date"],
+                            Poster_Image_url = video_infor["Poster-Image_uri"],
+                            Video_name = video_infor["Video-name"],
+                            Photo_name = video_infor["Photo-name"],
+                            Pornstarts = video_infor["Pornstarts"],
+                            configuration = self.handjob,
+                            cetegory = cetegory_obj
+                        )
+                        
+                        numbers_of_download_videos -= 1
+                    
+                    if numbers_of_download_videos <= 0 :
+                        break
                 if numbers_of_download_videos <= 0 :
                     break
-            if numbers_of_download_videos <= 0 :
-                break
                 
     def genrate_handjob_a_data_dict(self,video_li : list,hand_job_category_name : str):
         
@@ -341,32 +344,4 @@ class Bot(StartDriver):
         formatted_title = '_'.join(filter(None, formatted_title.split('_')))
         return formatted_title
     
-    def set_data_of_csv(self, videos_data_obj):
-        
-        df = self.check_csv_exist(videos_data_obj.configuration.website_name)
-        
-        new_data = {
-            "image": videos_data_obj.image,
-            "Username": videos_data_obj.Username,
-            "Likes": videos_data_obj.Likes,
-            "Disclike": videos_data_obj.Disclike,
-            "Url": videos_data_obj.Url,
-            "Title": videos_data_obj.Title,
-            "Discription": videos_data_obj.Discription,
-            "Release_Date": videos_data_obj.Release_Date,
-            "Poster_Image_url": videos_data_obj.Poster_Image_url,
-            "video_download_url": videos_data_obj.video_download_url,
-            "Video_name": videos_data_obj.Video_name,
-            "Photo_name": videos_data_obj.Photo_name,
-            "Pornstarts": videos_data_obj.Pornstarts,
-            "configuration": videos_data_obj.configuration.website_name,
-            "cetegory": videos_data_obj.cetegory.category
-        }
-        # df = df.append(new_data, ignore_index=True)
-        new_row = pd.DataFrame([new_data])
-
-        df = pd.concat([df, new_row], ignore_index=True)
-        csv_path = f"{os.path.join(os.getcwd(),'csv', videos_data_obj.configuration.website_name)}.csv"
-        df.to_csv(csv_path, index=False)
-        
-        pass
+    

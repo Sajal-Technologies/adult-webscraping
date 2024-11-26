@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from Scrape.settings import BASE_DIR
 from django.core.files.base import ContentFile
-from app.models import videos_collection, configuration
+from app.models import videos_collection, configuration, VideosData
 import requests, os, time
 from driver.Bots.adultprime import Bot
 from utils.mail import SendAnEmail
@@ -14,7 +14,7 @@ class Command(BaseCommand, Bot):
         self.base_path = os.getcwd()
         
         self.download_path = os.path.join(os.getcwd(),'downloads')
-        [ os.remove(os.path.join(os.getcwd(),'downloads',i)) for i in os.listdir('downloads') if i.endswith('.crdownload')]
+        [ os.remove(os.path.join(os.getcwd(),'downloads',i)) for i in os.listdir('downloads') if i.endswith('.crdownload') or i.endswith('.mp4') ]
         
         # Configurations
         self.adultprime = configuration.objects.get(website_name='Adultprime')
@@ -26,6 +26,7 @@ class Command(BaseCommand, Bot):
         self.csv_path = os.path.join(self.csv_folder_path,f'{self.csv_name}')
         
     def handle(self, *args, **options):
+        VideosData.delete_older_videos()
         self.make_init()
         self.driver = self.get_driver()
         if not self.driver :
@@ -34,7 +35,5 @@ class Command(BaseCommand, Bot):
         
         if self.adultprime_login():
             self.download_all_adultprime_channels_video()
-            video_dict = self.adultprime_get_video()
-            self.adultprime_download_video(video_dict)
     
         # self.download_and_save_file("http://208.122.217.49:8000/csv/vip4k_debt4k_videos_details.csv")

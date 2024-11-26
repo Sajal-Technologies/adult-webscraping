@@ -348,6 +348,7 @@ class StartDriver():
             None: If no download completes within the timeout.
         """
         print('Waiting for download to start...')
+        
         start_time = time.time()
         
         # Ensure the directory exists
@@ -366,6 +367,9 @@ class StartDriver():
                     print(f"Download started: {crdownload_file}")
                     break
                 
+            if crdownload_file : 
+                break
+                
         else :
             for f in os.listdir(download_dir) : 
                 if os.path.isfile(os.path.join(download_dir, f)) :
@@ -378,18 +382,23 @@ class StartDriver():
             print("No download started within the timeout period.")
             return None
 
+        
+        print("Download will check for 5 times for the secounds of :", timeout)
         # Wait for the .crdownload file to disappear, indicating the download is complete
-        while time.time() - start_time < timeout:
-            time.sleep(1)
+        completed_file = None
+        for _ in range(5):
+            print("Download checking completed or not for the :", _+1, "time")
+            while time.time() - start_time < timeout:
+                time.sleep(1)
 
-            # Check if the .crdownload file is gone
-            if not os.path.exists(os.path.join(download_dir, crdownload_file)):
-                completed_file = crdownload_file.replace('.crdownload', '')
-                print(f"Download complete: {completed_file}")
-                return completed_file
+                # Check if the .crdownload file is gone
+                if not os.path.exists(os.path.join(download_dir, crdownload_file)):
+                    completed_file = crdownload_file.replace('.crdownload', '')
+                    print(f"Download complete: {completed_file}")
+                    return completed_file
 
         print("Download did not complete within the timeout period.")
-        return None
+        return False
             
     def date_older_or_not(self,video_data='', old_days : int = 30):
         

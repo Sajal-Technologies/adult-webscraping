@@ -24,20 +24,20 @@ from twocaptcha import TwoCaptcha
 
 class Bot(StartDriver):
     def pegas_login(self):
+        self.pegas = configuration.objects.get(website_name='pegas')
         self.pegas_category_path = self.create_or_check_path('pegas_category_videos')
 
         self.get_driver()
         # self.connect_vpn()
         # 'https://www.pegasproductions.com/front?lang=en&chlg=1&langue=en&nats='
         self.driver.get('https://www.pegasproductions.com/')
-        breakpoint()
+
         
         if self.click_element('login btn', '//div[@class="connexion"]'):
             self.random_sleep()
             self.input_text(self.pegas.username, 'username','//input[@type="text"]')
             self.input_text(self.pegas.password, 'password','//input[@type="password"]')
             # self.click_element('username','//input[@type="submit"]')
-            breakpoint()
 
             self.pegas_download_videos()
             # captcha part

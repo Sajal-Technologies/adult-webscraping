@@ -26,9 +26,9 @@ class Bot(StartDriver):
         self.get_driver()
         self.driver.implicitly_wait(10)
         websites = {
-            # 'defloration':'https://4kpornxxx:th4f2baw@defloration.tv/members/',
-            # 'flexyteens':'https://4kpornxxx:th4f2baw@flexyteens.com/members/',
-            # 'virginmassage':'https://4kpornxxx:th4f2baw@virginmassage.com/members/',
+            'defloration':'https://4kpornxxx:th4f2baw@defloration.tv/members/',
+            'flexyteens':'https://4kpornxxx:th4f2baw@flexyteens.com/members/',
+            'virginmassage':'https://4kpornxxx:th4f2baw@virginmassage.com/members/',
             'underwatershow':'https://4kpornxxx:th4f2baw@underwatershow.com/members/',
         }
 
@@ -141,7 +141,6 @@ class Bot(StartDriver):
                             Discription = tmp["Discription"],
                             Release_Date = tmp["Release-Date"],
                             Poster_Image_url = tmp["Poster-Image_uri"],
-                            video_download_url = tmp["poster_download_uri"],
                             Video_name = tmp["Video-name"],
                             Photo_name = tmp["Photo-name"],
                             Pornstarts = tmp["Pornstarts"],
@@ -269,7 +268,6 @@ class Bot(StartDriver):
                         Discription = tmp["Discription"],
                         Release_Date = tmp["Release-Date"],
                         Poster_Image_url = tmp["Poster-Image_uri"],
-                        video_download_url = tmp["poster_download_uri"],
                         Video_name = tmp["Video-name"],
                         Photo_name = tmp["Photo-name"],
                         Pornstarts = tmp["Pornstarts"],
@@ -369,7 +367,6 @@ class Bot(StartDriver):
     #                         Discription = tmp["Discription"],
     #                         Release_Date = tmp["Release-Date"],
     #                         Poster_Image_url = tmp["Poster-Image_uri"],
-    #                         video_download_url = tmp["poster_download_uri"],
     #                         Video_name = tmp["Video-name"],
     #                         Photo_name = tmp["Photo-name"],
     #                         Pornstarts = tmp["Pornstarts"],
@@ -464,7 +461,6 @@ class Bot(StartDriver):
     #                         Discription = tmp["Discription"],
     #                         Release_Date = tmp["Release-Date"],
     #                         Poster_Image_url = tmp["Poster-Image_uri"],
-    #                         video_download_url = tmp["poster_download_uri"],
     #                         Video_name = tmp["Video-name"],
     #                         Photo_name = tmp["Photo-name"],
     #                         Pornstarts = tmp["Pornstarts"],
@@ -548,7 +544,6 @@ class Bot(StartDriver):
     #                         Discription = tmp["Discription"],
     #                         Release_Date = tmp["Release-Date"],
     #                         Poster_Image_url = tmp["Poster-Image_uri"],
-    #                         video_download_url = tmp["poster_download_uri"],
     #                         Video_name = tmp["Video-name"],
     #                         Photo_name = tmp["Photo-name"],
     #                         Pornstarts = tmp["Pornstarts"],
@@ -636,7 +631,6 @@ class Bot(StartDriver):
     #                         Discription = tmp["Discription"],
     #                         Release_Date = tmp["Release-Date"],
     #                         Poster_Image_url = tmp["Poster-Image_uri"],
-    #                         video_download_url = tmp["poster_download_uri"],
     #                         Video_name = tmp["Video-name"],
     #                         Photo_name = tmp["Photo-name"],
     #                         Pornstarts = tmp["Pornstarts"],
