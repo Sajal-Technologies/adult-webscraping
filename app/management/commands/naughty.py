@@ -8,6 +8,8 @@ from utils.mail import SendAnEmail
 
 class Command(BaseCommand, Bot):
     help = "Closes the specified poll for voting"
+    def add_arguments(self, parser):
+        parser.add_argument("--only_login", default=False, type=bool)
 
     def make_init(self):
         self.driver_type = "normal"     
@@ -33,7 +35,24 @@ class Command(BaseCommand, Bot):
             SendAnEmail('Could not open up the driver')
             return
         
+        only_login = options["only_login"]
+        if only_login :
+            print('only login')
+            if self.naughty_ame_login():
+                self.fivek_teen.lastime_able_to_login_or_not = True
+                self.fivek_teen.save()
+            else:
+                self.fivek_teen.lastime_able_to_login_or_not = False
+                self.fivek_teen.save()
+        else :
+            print('Not only login')
+            
         if self.naughty_ame_login():
+            self.fivek_teen.lastime_able_to_login_or_not = True
+            self.fivek_teen.save()
             self.naughty_ame()
+        else:
+            self.fivek_teen.lastime_able_to_login_or_not = False
+            self.fivek_teen.save()
 
         # self.download_and_save_file("http://208.122.217.49:8000/csv/vip4k_debt4k_videos_details.csv")

@@ -111,7 +111,7 @@ class Bot(StartDriver):
 
         
     def vip4k_get_video(self,url :str='', channel: bool= False):
-        self.calculate_old_date(self.vip4k.more_than_old_days_download)
+        
         video_detailes = {'collection_name':'','video_list':[]}
         videos_urls = []
         if channel: self.driver.get(url)
@@ -153,6 +153,7 @@ class Bot(StartDriver):
         return video_detailes
     
     def vip4k_download_video(self,videos_dict : dict):
+        self.driver.save_screenshot('driver.png')
         videos_urls = videos_dict['video_list']
         collection_name = videos_dict['collection_name']
         collection_path = self.create_or_check_path(self.vip4k_category_path,sub_folder_=collection_name)

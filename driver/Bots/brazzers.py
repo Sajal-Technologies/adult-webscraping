@@ -284,10 +284,16 @@ class Bot(StartDriver):
                 )
                 if not Site_name :
                     cetegory_obj, _ = cetegory.objects.get_or_create(category = self.brazzers.main_category)
+                    if cetegory_obj not in self.brazzers.category.all():
+                        # Add the category to the configuration's category list
+                        self.brazzers.category.add(cetegory_obj)
                     videos_data_obj.cetegory = cetegory_obj
                     videos_data_obj.save()
                 else:
                     cetegory_obj, _ = cetegory.objects.get_or_create(category = Site_name)
+                    if cetegory_obj not in self.brazzers.category.all():
+                        # Add the category to the configuration's category list
+                        self.brazzers.category.add(cetegory_obj)
                     videos_data_obj.cetegory = cetegory_obj
                     videos_data_obj.save()
             except Exception as e:

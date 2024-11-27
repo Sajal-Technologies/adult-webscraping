@@ -255,7 +255,6 @@ class Bot(StartDriver):
                 FullHD_link = DownloadQualityMenu.find_elements(By.TAG_NAME,'li')
                 
                 
-                
                 media_path = os.path.join(os.getcwd(),'media')
                 video_media_path = os.path.join(media_path,'videos','Adultprime_category_videos',self.category.category)
                 image_media_path = os.path.join(media_path,'image','Adultprime_category_videos',self.category.category)
@@ -297,7 +296,10 @@ class Bot(StartDriver):
                     print("Video file : ",exists_media_videos_path)
                     
                     if os.path.exists(final_video_media_path) and os.path.exists(final_image_media_path) :
-                    
+                        if self.category not in self.adultprime.category.all():
+                            # Add the category to the configuration's category list
+                            self.adultprime.category.add(self.category)
+                            
                         videos_data_obj = VideosData.objects.create(
                             video = exists_media_videos_path,
                             image = exists_media_image_path,

@@ -8,6 +8,8 @@ from utils.mail import SendAnEmail
 
 class Command(BaseCommand, Bot):
     help = "Closes the specified poll for voting"
+    def add_arguments(self, parser):
+        parser.add_argument("--only_login", default=False, type=bool)
 
     def make_init(self):
         self.driver_type = "normal"     
@@ -33,6 +35,7 @@ class Command(BaseCommand, Bot):
             SendAnEmail('Could not open up the driver')
             return
         
+            
         # no needs to login
         self.revsharecash_download()
     

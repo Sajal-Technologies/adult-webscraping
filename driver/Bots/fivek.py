@@ -245,6 +245,9 @@ class Bot(StartDriver):
                     
                 object_video_file = os.path.join('image','fivekteen_category_videos',cetegory_obj.category,f'{tmp["Video-name"]}'.replace('.mp4','.jpg'))
                 object_image_file = os.path.join('videos','fivekteen_category_videos',cetegory_obj.category,f'{tmp["Video-name"]}')
+                
+                if cetegory_obj not in self.fivekteen.category.all():
+                    self.fivekteen.category.add(cetegory_obj)
                     
                 VideosData.objects.create(
                         video = object_video_file,
@@ -359,7 +362,9 @@ class Bot(StartDriver):
                 object_image_file = os.path.join('videos','fivekteen_category_videos',cetegory_obj.category,f'{tmp["Video-name"]}')
                 
                 if os.path.exists(final_video_media_path) and os.path.exists(final_image_media_path) :
-                
+                    if cetegory_obj not in self.fivekteen.category.all():
+                        self.fivekteen.category.add(cetegory_obj)
+                        
                     VideosData.objects.create(
                             video = object_video_file,
                             image = object_image_file,

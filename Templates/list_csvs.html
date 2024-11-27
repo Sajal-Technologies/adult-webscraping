@@ -1,17 +1,55 @@
+<!-- list_csvs.html -->
 <!DOCTYPE html>
 <html>
 <head>
-    <title>CSV Downloads</title>
+    <title>Download CSVs</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
 </head>
 <body>
-    <h1>Configuration CSV Downloads</h1>
-    <ul>
-        {% for item in data %}
-        <li>
-            <strong>{{ item.config.website_name }}</strong> - 
-            <a href="{{ item.download_link }}">Download CSV</a>
-        </li>
-        {% endfor %}
-    </ul>
+    <h1>CSV Downloads</h1>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Configuration</th>
+                <th>Category/ Main Category</th>
+                <th>Number of videos</th>
+                <th>Last downloaded videos Time</th>
+                <th>Next downloaded videos Time</th>
+                <th>Download CSV</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in data %}
+                <tr>
+                    <td>{{ item.config.website_name }}</td>
+                    <td>
+                        {% if item.type == 'Main Category' %}
+                        {{ item.main_category }}
+                        {% else %}
+                        {{ item.category.category }}
+                        {% endif %}
+                    </td>
+                    <td>{{ item.number_of_videos }}</td>
+                    <td>{{ item.Last_downloaded_videos }}</td>
+                    <td>{{ item.formatted_next_run }}</td>
+                    <td><a href="{{ item.download_link }}">Download CSV</a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
 </body>
 </html>

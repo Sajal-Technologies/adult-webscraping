@@ -9,6 +9,8 @@ from utils.mail import SendAnEmail
 class Command(BaseCommand, Bot):
     help = "Closes the specified poll for voting"
 
+    def add_arguments(self, parser):
+        parser.add_argument("--only_login", default=False, type=bool)
     
     def download_and_save_file(self,url):
         # Fetch the file from the URL
@@ -47,7 +49,21 @@ class Command(BaseCommand, Bot):
             SendAnEmail('Could not open up the driver')
             return
         
+        only_login = options["only_login"]
+        if only_login :
+            print('only login')
+            if self.brazzers_login():
+                self.brazzers.lastime_able_to_login_or_not = True
+                self.brazzers.save()
+            else:
+                self.brazzers.lastime_able_to_login_or_not = False
+                self.brazzers.save()
+        else :
+            print('Not only login')
+            
         if self.brazzers_login():
+            self.brazzers.lastime_able_to_login_or_not = True
+            self.brazzers.save()
             video_dict = self.get_brazzers_videos_url()
             self.download_brazzer_videos(video_dict)
             tags_102 = self.get_brazzers_videos_url(url='https://site-ma.brazzers.com/scenes?addon=102')
@@ -56,7 +72,9 @@ class Command(BaseCommand, Bot):
             self.download_brazzer_videos(tags_152, 'addon_152')  # reality kings
             tags_162 = self.get_brazzers_videos_url(url='https://site-ma.brazzers.com/scenes?addon=162')
             self.download_brazzer_videos(tags_162, 'addon_162')  # brazzers_main
-        self.driver.current_url
+        else:
+            self.brazzers.lastime_able_to_login_or_not = False
+            self.brazzers.save()
     
     
     

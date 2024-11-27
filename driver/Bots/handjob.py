@@ -162,6 +162,10 @@ class Bot(StartDriver):
             cetegory_obj, _ = cetegory.objects.get_or_create(category = self.handjob.main_category)
             
             if os.path.exists(final_image_media_path) and os.path.exists(final_video_media_path) :
+                
+                if cetegory_obj not in self.handjob.category.all():
+                    self.handjob.category.add(cetegory_obj)
+                    
                 videos_data_obj = VideosData.objects.create(
                     video = videos_object_path,
                     image = image_object_path,
@@ -271,12 +275,17 @@ class Bot(StartDriver):
                         with open(final_image_media_path, 'wb') as file: file.write(response.content)
 
                     cetegory_obj, _ = cetegory.objects.get_or_create(category = category)
+                    if cetegory_obj not in self.handjob.category.all():
+                        self.handjob.category.add(cetegory_obj)
+                        
                     videos_object_path = os.path.join('videos','handjob_category_videos',category.category,f'{video_infor["Video-name"]}')
                     image_object_path = os.path.join('image','handjob_category_videos',category.category,f'{video_infor["Video-name"]}'.replace('.mp4','.jpg'))
                     print("Image file : ",image_object_path)
                     print("Video file : ",videos_object_path)
                     
                     if os.path.exists(final_video_media_path) and os.path.exists(final_image_media_path) :
+                        
+                    
                         videos_data_obj = VideosData.objects.create(
                             video = videos_object_path,
                             image = image_object_path,

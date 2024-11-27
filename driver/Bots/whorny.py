@@ -144,15 +144,15 @@ class Bot(StartDriver):
                                 self.download_video_from_request(url, final_video_media_path, headers)
                                 
                                 
-                                object_video_file = os.path.join('videos','sexmex_category_videos',self.sexmex.main_category,f'{video_name}.mp4')
-                                object_image_file = os.path.join('image','sexmex_category_videos',self.sexmex.main_category,f'{video_name}.jpg')
+                                object_video_file = os.path.join('videos','sexmex_category_videos',self.whorny.main_category,f'{video_name}.mp4')
+                                object_image_file = os.path.join('image','sexmex_category_videos',self.whorny.main_category,f'{video_name}.jpg')
                                 print("Image file : ",object_image_file)
                                 print("Video file : ",object_video_file)
                                 
                                 if os.path.exists(final_video_media_path) and os.path.exists(final_image_media_path) :
-                                
+                                    
                                     videos_data_obj = VideosData.objects.create(
-                                        Username = self.sexmex.username,
+                                        Username = self.whorny.username,
                                         Likes = 0,
                                         Disclike = 0,
                                         Url = self.driver.current_url,
@@ -163,10 +163,13 @@ class Bot(StartDriver):
                                         Video_name = tmp["Video-name"],
                                         Photo_name = tmp["Photo-name"],
                                         Pornstarts = tmp["Pornstarts"],
-                                        configuration = self.sexmex
+                                        configuration = self.whorny
                                     )
-                                    if self.sexmex.main_category :
-                                        cetegory_obj, _ = cetegory.objects.get_or_create(category = self.sexmex.main_category)
+                                    
+                                    if self.whorny.main_category :
+                                        cetegory_obj, _ = cetegory.objects.get_or_create(category = self.whorny.main_category)
+                                        if cetegory_obj not in self.whorny.category.all():
+                                            self.whorny.category.add(cetegory_obj)
                                         videos_data_obj.cetegory = cetegory_obj
                                         videos_data_obj.save()
                                     

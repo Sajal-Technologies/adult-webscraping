@@ -130,6 +130,10 @@ class Bot(StartDriver):
                     print("Video file : ",object_video_file)
                 
                     cetegory_obj, _ = cetegory.objects.get_or_create(category = website)
+                    
+                    if cetegory_obj not in self.revsharecash.category.all():
+                        self.revsharecash.category.add(cetegory_obj)
+                        
                     videos_data_obj = VideosData.objects.create(
                             video = object_video_file,
                             image = object_image_file,
@@ -147,7 +151,6 @@ class Bot(StartDriver):
                             configuration = self.revsharecash,
                             cetegory = cetegory_obj
                         )
-                    
                     
                     found_videos+=1
 
@@ -257,6 +260,10 @@ class Bot(StartDriver):
                 print("Video file : ",object_video_file)
             
                 cetegory_obj, _ = cetegory.objects.get_or_create(category = website)
+                
+                if cetegory_obj not in self.revsharecash.category.all():
+                        self.revsharecash.category.add(cetegory_obj)
+                        
                 videos_data_obj = VideosData.objects.create(
                         video = object_video_file,
                         image = object_image_file,

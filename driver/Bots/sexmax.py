@@ -56,13 +56,17 @@ class Bot(StartDriver):
         self.click_element('see more', 'float-end', By.CLASS_NAME)
         self.driver.get('https://members.sexmex.xxx/members/category.php?id=5')
 
+        current_date = datetime.now()
         while found_videos < max_video:
             section = self.find_element('section', '/html/body/div[3]/div[1]')
             all_div = section.find_elements(By.XPATH, './div')
             for div in all_div:
                 scene_date = div.find_element(By.CLASS_NAME, 'scene-date').text
                 
-                if self.date_older_or_not(scene_date,self.sexmex.more_than_old_days_download):
+                given_date = datetime.strptime(scene_date, '%m/%d/%Y')
+                date_difference = current_date - given_date
+
+                if date_difference > timedelta(days=self.sexmex.more_than_old_days_download):
                     link = div.find_element(By.XPATH, '//h5/a').get_attribute('href')
                     if link not in df_url:
                         video_list.append(link)
@@ -131,6 +135,8 @@ class Bot(StartDriver):
                 print("Image file : ",object_image_file)
                 print("Video file : ",object_video_file)
 
+                
+                
                 videos_data_obj = VideosData.objects.create(
                     Username = self.sexmex.username,
                     Likes = 0,
@@ -147,6 +153,8 @@ class Bot(StartDriver):
                 )
                 if self.sexmex.main_category :
                     cetegory_obj, _ = cetegory.objects.get_or_create(category = self.sexmex.main_category)
+                    if cetegory_obj not in self.sexmex.category.all():
+                        self.sexmex.category.add(cetegory_obj)
                     videos_data_obj.cetegory = cetegory_obj
                     videos_data_obj.save()
                 
