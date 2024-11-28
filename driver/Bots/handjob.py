@@ -26,6 +26,11 @@ class Bot(StartDriver):
     def login_Handjob_TV(self):
         url = "https://handjob.tv/login"
         self.driver.get(url)
+        
+        self.load_cookies(self.handjob.website_name)
+        if self.find_element('Logout btn','//a[@class="logout"]'):
+            return True
+        
         self.click_element('agree btn','verify-age', By.ID, timeout=3)
         self.input_text(self.handjob.username,'username','//input[@id="username"]')
         self.input_text(self.handjob.password,'password','//input[@id="password"]')

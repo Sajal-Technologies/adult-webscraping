@@ -28,45 +28,115 @@ class Bot(StartDriver):
         self.pegas_category_path = self.create_or_check_path('pegas_category_videos')
 
         self.get_driver()
-        # self.connect_vpn()
-        # 'https://www.pegasproductions.com/front?lang=en&chlg=1&langue=en&nats='
-        self.driver.get('https://www.pegasproductions.com/')
 
-        
-        if self.click_element('login btn', '//div[@class="connexion"]'):
+        for _ in range(3):
+            self.load_cookies('pegas', refreash=False)
+            self.driver.get("https://www.pegasproductions.com/tube?type=scenes&order=dateup")
+            breakpoint()
+            # href="https://pegasproductions.com/login/"
             self.random_sleep()
-            self.input_text(self.pegas.username, 'username','//input[@type="text"]')
-            self.input_text(self.pegas.password, 'password','//input[@type="password"]')
-            # self.click_element('username','//input[@type="submit"]')
-
-            self.pegas_download_videos()
-            # captcha part
-            url = "https://members.5kporn.com/login"
-            API_KEY = '6e00098870d05c550b921b362c2abde8'
-            solver = TwoCaptcha(API_KEY)
-
-            site_key_ele = self.find_element('SITE-KEY', 'g-recaptcha', By.CLASS_NAME)
-            site_key = site_key_ele.get_attribute('data-sitekey')
-            result = solver.recaptcha(sitekey=site_key, url=url)
-            recaptcha_response = result['code']
-            self.driver.execute_script('document.getElementById("g-recaptcha-response").innerHTML = arguments[0]',
-                                       recaptcha_response)
-
-            self.click_element('login btn', '//*[@type="submit"]')
-
-            if self.find_element('Log out btn','//a[@href="https://pegasproductions.com/front/?logout=1"]') :
+            self.driver.refresh()
+            self.driver.delete_all_cookies()
+            if self.click_element('logout btn',"//a[@href='https://pegasproductions.com/login/']") :
+                self.input_text(self.pegas.username, 'username','//input[@type="text"]')
+                self.input_text(self.pegas.password, 'password','//input[@type="password"]')
+                self.click_element('login btn','//input[@type="submit"]')
+            
+            if self.find_element('logout btn',"//a[contains(text(), 'Logout')]", timeout=5) :
                 self.get_cookies('pages')
+                return True
                 
-                
-    def pegas_download_videos(self):
-        self.pegas.category
-        all_cetegory = self.driver.find_elements(By.XPATH,'//*[@id="module-de-recherche-videos"]/div[2]/div[1]/div[1]/form/select/*')
-        category = [i for i in all_cetegory if self.pegas.category.lower() in i.text.lower()]
-        if not category:
-            category = random.choice(all_cetegory[2:])
+            if not self.find_element('logout btn',"//a[contains(text(), 'Logout')]") :
+                continue
+            
+    def pegas_download_videos(self, remained_download_video_number = 0):
+        
+        df_url = VideosData.objects.filter(configuration=self.revsharecash).values_list('Url', flat=True)
+        max_video_download_number = self.pegas.numbers_of_download_videos + 5
+        
+        download_video_link = []
+        all_videos_ = self.driver.find_elements(By.XPATH,'//a[@class="page"]')
+        while True :
+            all_videos_ = self.driver.find_elements(By.XPATH,'//div[@class="span2" and @itemprop="video"]')
+            for video_div in all_videos_ :
+                video_link = video_div.find_elements(By.TAG_NAME,'a')
+                if video_link :
+                    video_link = video_link[-1].get_attribute('href')
+                    if video_link :
+                        
+                        if not video_link in df_url :
+                            download_video_link.append(video_link)
+            
+                if len(download_video_link) >= max_video_download_number :
+                    break
+            
+            if len(download_video_link) >= max_video_download_number :
+                break
+            
+            if not self.click_element('Next page ele1','//a[@class="nextpostslink"]', timeout=5) :
+                self.click_element('next page','//a[@class="page"]', timeout=5)
+        
+        if remained_download_video_number :
+            max_video_download_number = remained_download_video_number
         else :
-            category = category[0]
+            max_video_download_number = self.pegas.numbers_of_download_videos
+        
+        for video_url in download_video_link :
+            self.driver.get(video_url)
+            video_title = video_url.split('/')[-1]
+            video_title = 'pegas_'+self.sanitize_title(video_title)
+            
+            media_path = os.path.join(os.getcwd(),'media')
+            video_media_path = os.path.join(media_path,'videos','pegas_category_videos',self.pegas.main_category)
+            image_media_path = os.path.join(media_path,'image','pegas_category_videos',self.pegas.main_category)
 
-        category.click()
-        allvideos = self.driver.find_elements(By.CLASS_NAME,"rollover_img_videotour")
-        if allvideos : ...
+            os.makedirs(video_media_path, exist_ok=True)
+            os.makedirs(image_media_path, exist_ok=True)
+            
+            final_video_media_path = os.path.join(video_media_path,f'{video_title}.mp4')
+            final_image_media_path = os.path.join(image_media_path,f'{video_title}.jpg')
+            
+            photo_url = ""
+            if not photo_url :
+                photo_url = self.find_element('photo url','//*[@itemprop="thumbnailUrl"]', By.XPATH)
+                if photo_url :
+                    photo_url = photo_url.get_attribute('content')
+
+            if photo_url:
+                response = requests.get(photo_url)
+                with open(final_image_media_path, 'wb') as f: 
+                    f.write(response.content)
+            
+            video__download_url = self.find_element('video url','//*[@autoplay="" and @playsinline="true" ]', By.XPATH)
+            if not video__download_url :
+                self.click_element('play btn','//a[@class="fp-icon fp-playbtn"]', By.XPATH)
+                self.random_sleep(15,20)
+                
+            video__download_url = self.find_element('video url','//*[@autoplay="" and @playsinline="true" ]', By.XPATH)
+            if video__download_url :
+                self.download_video_from_request(video__download_url, final_video_media_path)
+
+            if os.path.exists(final_image_media_path) and os.path.exists(final_video_media_path) :
+                cetegory_obj, _ = cetegory.objects.get_or_create(category = self.sexmex.main_category)
+                
+                videos_data_obj = VideosData.objects.create(
+                    Username = self.pegas.username,
+                    Likes = 0,
+                    Disclike = 0,
+                    Url = self.driver.current_url,
+                    Title = video_title,
+                    Poster_Image_url = photo_url,
+                    Video_name = f'{video_title}.mp4',
+                    Photo_name = f'{video_title}.jpg',
+                    configuration = self.pegas,
+                    cetegory = cetegory_obj,
+                    video = final_video_media_path,
+                    image = final_image_media_path
+                )
+                max_video_download_number -= 1
+                
+            if 0 <= max_video_download_number :
+                break
+            
+        else :
+            self.pegas_download_videos(max_video_download_number)

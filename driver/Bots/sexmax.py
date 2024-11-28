@@ -42,6 +42,7 @@ class Bot(StartDriver):
     
     def sexmax_video_download(self):
         csv_name = 'Sexmex'
+        breakpoint()
         self.check_csv_exist(csv_name)
         if self.sexmex.main_category :
             self.sexmex_category_path = self.create_or_check_path(self.sexmex_category_path,sub_folder_=self.sexmex.main_category)

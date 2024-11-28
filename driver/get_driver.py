@@ -261,7 +261,7 @@ class StartDriver():
         print('Driver is closed !')
         
         
-    def load_cookies(self,website :str, redirect_url:str=''):
+    def load_cookies(self,website :str, redirect_url:str='', refreash=True):
         try:
             # if 'vip4k' in website:
             #     path = os.path.join(self.cookies_path,f'{website}_cookietest.json')
@@ -276,7 +276,9 @@ class StartDriver():
                 with open(path,'rb') as f:cookies = json.load(f)
                 for item in cookies: self.driver.add_cookie(item)
             if redirect_url:self.driver.get(redirect_url)
-            else:self.driver.refresh()
+            else:
+                if refreash :
+                    self.driver.refresh()
             self.random_sleep()                
         except : 
             SendAnEmail('The coockies could not be loaded')

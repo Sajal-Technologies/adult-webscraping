@@ -19,12 +19,12 @@ class Command(BaseCommand, Bot):
         [ os.remove(os.path.join(os.getcwd(),'downloads',i)) for i in os.listdir('downloads') if i.endswith('.crdownload') or i.endswith('.mp4') ]
         
         # Configurations
-        self.fivek_teen = configuration.objects.get(website_name='Fivek_teen')
-        self.fivek_teen_category_path = self.create_or_check_path('Fivek_teen_category_videos')
+        self.pegas = configuration.objects.get(website_name='pegas')
+        self.pegas_category_path = self.create_or_check_path('pegas_category_videos')
 
         self.csv_folder_path = self.create_or_check_path('csv',main=True)
         self.cookies_path = self.create_or_check_path('cookies',main=True)
-        self.csv_name = "Fivek_teen.csv"
+        self.csv_name = "pegas.csv"
         self.csv_path = os.path.join(self.csv_folder_path,f'{self.csv_name}')
         
     def handle(self, *args, **options):
@@ -38,19 +38,21 @@ class Command(BaseCommand, Bot):
         only_login = options["only_login"]
         if only_login :
             print('only login')
-            if self.adultprime_login():
-                self.fivek_teen.lastime_able_to_login_or_not = True
-                self.fivek_teen.save()
+            if self.pegas_login():
+                self.pegas.lastime_able_to_login_or_not = True
+                self.pegas.save()
             else :
-                self.fivek_teen.lastime_able_to_login_or_not = False
-                self.fivek_teen.save()
+                self.pegas.lastime_able_to_login_or_not = False
+                self.pegas.save()
         else :
             print('Not only login')
             
-        if self.naughty_ame_login():
-            self.naughty_ame()
+        if self.pegas_login():
+            self.pegas.lastime_able_to_login_or_not = True
+            self.pegas.save()
+            self.pegas_download_videos()
         else :
-            self.fivek_teen.lastime_able_to_login_or_not = False
-            self.fivek_teen.save()
+            self.pegas.lastime_able_to_login_or_not = False
+            self.pegas.save()
 
         # self.download_and_save_file("http://208.122.217.49:8000/csv/vip4k_debt4k_videos_details.csv")

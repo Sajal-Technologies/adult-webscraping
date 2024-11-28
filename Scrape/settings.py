@@ -129,15 +129,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 INSTALLED_APPS += [
     'app',
-    'django_cron'
 ]
 # Where the uploaded media files will be stored on your file system
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # The URL prefix for accessing media files (in development)
 MEDIA_URL = '/media/'
-
-
-CRONJOBS = [
-    ('* * * * *', 'app.crontasks.Calling_commands'),
-]
