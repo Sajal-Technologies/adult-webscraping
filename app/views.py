@@ -81,7 +81,17 @@ def generate_csv(configuration_obj, category_obj, request, is_main_category=Fals
     # Prepare data for the DataFrame
     data = []
     for video in videos:
+        if not os.path.exists(os.path.join(settings.MEDIA_ROOT, video.video.name)) :
+            video.deleted_or_not = True
+            video.save()
+            continue
+        
         video_download_link = request.build_absolute_uri(reverse('download_media_file', args=[video.video.name])) if video.video else ''
+        
+        if not os.path.exists(os.path.join(settings.MEDIA_ROOT, video.image.name)) :
+            video.deleted_or_not = True
+            video.save()
+            continue
         image_download_link = request.build_absolute_uri(reverse('download_media_file', args=[video.image.name])) if video.image else ''
         
         data.append({
