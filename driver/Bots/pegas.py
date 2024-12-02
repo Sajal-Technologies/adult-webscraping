@@ -32,7 +32,6 @@ class Bot(StartDriver):
         for _ in range(3):
             self.load_cookies('pegas', refreash=False)
             self.driver.get("https://www.pegasproductions.com/tube?type=scenes&order=dateup")
-            breakpoint()
             # href="https://pegasproductions.com/login/"
             self.random_sleep()
             self.driver.refresh()

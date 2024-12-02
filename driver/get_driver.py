@@ -359,48 +359,57 @@ class StartDriver():
 
         crdownload_file = None
 
+        # Wait for a .crdownload file to appear in the download directory
         for i in range(timeout):
             time.sleep(1)
             
-            # List only files in the top level of the directory
-            for crd in os.listdir(download_dir) :
-                if crd.endswith('.crdownload') :
+            # List files in the top level of the directory
+            for crd in os.listdir(download_dir):
+                if crd.endswith('.crdownload'):
                     crdownload_file = crd
                     print(f"Download started: {crdownload_file}")
                     break
-                
-            if crdownload_file : 
+
+            if crdownload_file:
                 break
-                
-        else :
-            for f in os.listdir(download_dir) : 
-                if os.path.isfile(os.path.join(download_dir, f)) :
-                    if not f in files :
-                        if f.endswith(".mp4") :
-                            return f
-            
+        else:
+            # If no download starts within the timeout, check for a finished file
+            for f in os.listdir(download_dir):
+                if os.path.isfile(os.path.join(download_dir, f)):
+                    if f.endswith(".mp4") and f not in files:
+                        return f
 
         if not crdownload_file:
             print("No download started within the timeout period.")
             return None
 
-        
-        print("Download will check for 5 times for the secounds of :", timeout)
+        print("Download is in progress. Checking until download completes...")
+
         # Wait for the .crdownload file to disappear, indicating the download is complete
         completed_file = None
-        for _ in range(5):
-            print("Download checking completed or not for the :", _+1, "time")
-            while time.time() - start_time < timeout:
-                time.sleep(1)
+        while True:
+            if crdownload_file :
+                print("Download is in progress. Checking until download completes... While loop")
+                
+                while True :
+                    if not os.path.exists(os.path.join(download_dir, crdownload_file)):
+                        completed_file = crdownload_file.replace('.crdownload', '')
+                        print(f"Download complete: {completed_file}")
+                        return completed_file
+            
+            if not os.path.exists(os.path.join(download_dir, crdownload_file)):
+                # Download is complete
+                completed_file = crdownload_file.replace('.crdownload', '')
+                print(f"Download complete: {completed_file}")
+                return completed_file
+            
+            # If the file is still in progress, wait for a short period before checking again
+            time.sleep(1)
 
-                # Check if the .crdownload file is gone
-                if not os.path.exists(os.path.join(download_dir, crdownload_file)):
-                    completed_file = crdownload_file.replace('.crdownload', '')
-                    print(f"Download complete: {completed_file}")
-                    return completed_file
-
-        print("Download did not complete within the timeout period.")
-        return False
+            # Break if timeout exceeds (check for maximum timeout)
+            if time.time() - start_time > timeout:
+                print("Download did not complete within the timeout period.")
+                return False
             
     def date_older_or_not(self,video_data='', old_days : int = 30):
         
