@@ -181,7 +181,7 @@ def list_csvs(request):
         
         # Add download links for all categories associated with the configuration
         for category in config.category.all():
-            videos_data = VideosData.objects.filter(configuration=config, cetegory=category)
+            videos_data = VideosData.objects.filter(configuration=config, cetegory=category, deleted_or_not = False)
             if videos_data :
                 number_of_videos = videos_data.count()
                 last_download = videos_data.last().created_at.strftime('%b %d, %Y at %I %p')
