@@ -45,7 +45,7 @@ class Bot(StartDriver):
                 self.random_sleep(10,15)
                 
                 if self.find_element('Un Authorized Attempt',"//span[contains(text(), 'Oops, seems like the username and/or password')]", timeout=5):
-                    print('Closing chrome bcz found the unauthorized page')
+                    print('Closing chrome bcz found the unauthorized page and trying again')
                     un_authorized = True
                     self.CloseDriver()
                     self.get_driver()
@@ -207,5 +207,8 @@ class Bot(StartDriver):
                         break
                         
                     
-                            
+    def bangbrobs_logout(self):
+        breakpoint()
+        
+        pass
                         

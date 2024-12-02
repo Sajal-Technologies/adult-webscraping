@@ -41,6 +41,7 @@ class Command(BaseCommand, Bot):
             if self.BangBros_login():
                 self.BangBros.lastime_able_to_login_or_not = True
                 self.BangBros.save()
+                self.bangbrobs_logout()
             else :
                 self.BangBros.lastime_able_to_login_or_not = False
                 self.BangBros.save()
@@ -51,6 +52,8 @@ class Command(BaseCommand, Bot):
             self.BangBros.lastime_able_to_login_or_not = True
             self.BangBros.save()
             self.BangBros_download_videos()
+            self.bangbrobs_logout()
+            
         else :
             self.BangBros.lastime_able_to_login_or_not = False
             self.BangBros.save()

@@ -78,9 +78,12 @@ class Bot(StartDriver):
         return False
     
     def download_from_main_category(self):
+        if not self.handjob.main_category :
+            return 
+        
         search_ele = self.input_text(self.handjob.main_category,'search input','//input[@id="search"]')
         search_ele.submit()
-        csv_name = "Handjob.csv"
+        csv_name = "Handjob.csv"`
         self.check_csv_exist(csv_name)
         collection_path = self.create_or_check_path(self.handjob_category_path,sub_folder_=self.handjob.main_category)
         
