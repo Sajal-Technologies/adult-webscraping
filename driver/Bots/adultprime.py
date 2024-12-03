@@ -78,6 +78,9 @@ class Bot(StartDriver):
         return False
     
     def get_adultprime_category(self):
+        if not self.adultprime.main_category :
+            return
+        
         self.driver.get('https://adultprime.com/categories')
         self.random_sleep(2,3)
         while True:    
