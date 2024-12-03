@@ -10,7 +10,6 @@ videos/*
 etc
 downloads/*
 db.sqlite3
-.vscode
 chrome
 photos/*
 *.sqlite3
@@ -36,3 +35,7 @@ extensions
 cookies
 media/*
 static_root
+branch_structure.json
+temp_auto_push.bat
+temp_interactive_push.bat
+.gitignore
